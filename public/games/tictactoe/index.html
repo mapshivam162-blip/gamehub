@@ -1,119 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1a1f3a">
-    <title>Tic-Tac-Toe ✖⭕ — GameHub</title>
-    
-    <link rel="icon" type="image/svg+xml" href="../../icon.svg">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-      #back-btn {
-        position: fixed;
-        top: max(10px, env(safe-area-inset-top));
-        left: 12px;
-        z-index: 999;
-        width: 40px; height: 40px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.92);
-        border: 2px solid #1a1f3a;
-        box-shadow: 0 3px 0 #0b1022;
-        font-size: 18px; line-height: 1;
-        cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        text-decoration: none; color: #1a1f3a;
-        -webkit-tap-highlight-color: transparent;
-      }
-      #back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #0b1022; }
-    </style>
 
-    <script src="script.js" defer></script>
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Tic-Tac-Toe ✖⭕ — GameHub</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-    <a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
 
-    <main class="main-container" id="main-container">
-        
-        <section class="start-menu" id="start-menu">
-            <div class="icon-logo"><i class="bi bi-x-lg"></i><i class="bi bi-circle"></i></div>
-            <div class="picker-card">
-                <h4>Pick player 1's mark</h4>
-                <div class="picker-toggle">
-                    <button id="pick-x" class="active" aria-pressed="true"><i class="bi bi-x-lg"></i></button>
-                    <button id="pick-o" aria-pressed="false"><i class="bi bi-circle"></i></button>
-                </div>
-                <p>X GOES FIRST</p>
-            </div>
-            <div class="difficulty-card">
-                <h4>Choose difficulty</h4>
-                <div class="difficulty-buttons">
-                    <button class="btn" data-difficulty="easy">Easy</button>
-                    <button class="btn active" data-difficulty="medium">Medium</button>
-                    <button class="btn" data-difficulty="hard">Hard</button>
-                </div>
-            </div>
-            <button class="btn btn-yellow" id="new-game-btn">New Game (vs CPU)</button>
-        </section>
+<div class="wrap">
+  <!-- ===== MENU SCREEN ===== -->
+  <section id="menu-screen" class="screen active">
+    <div class="cabinet">
+      <div class="badge">✖⭕ TIC-TAC-TOE</div>
+      <h1 class="title">Tic-Tac-Toe</h1>
+      <p class="subtitle">X aur O — 3 in a row banao!</p>
 
-        <section class="game-screen hidden" id="game-screen">
-            <header class="game-header">
-                <div class="icon-logo"><i class="bi bi-x-lg"></i><i class="bi bi-circle"></i></div>
-                <div class="turn-indicator" aria-live="polite">
-                    <i id="turn-icon" class="bi bi-x-lg"></i><span>TURN</span>
-                </div>
-                <button class="btn-restart" id="restart-btn" aria-label="Restart game"><i class="bi bi-arrow-counterclockwise"></i></button>
-            </header>
-
-            <div class="thinking-indicator" id="thinking-indicator">Computer is thinking...</div>
-
-            <div class="game-board" role="grid">
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="0"><i></i></div>
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="1"><i></i></div>
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="2"><i></i></div>
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="3"><i></i></div>
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="4"><i></i></div>
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="5"><i></i></div>
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="6"><i></i></div>
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="7"><i></i></div>
-                <div class="board-cell" role="gridcell" tabindex="0" data-index="8"><i></i></div>
-            </div>
-
-            <footer class="game-footer">
-                <div class="score-card" id="player-score-card">
-                    <p id="player-score-label">X (YOU)</p><div class="score" id="player-score">0</div>
-                </div>
-                <div class="score-card" id="tie-score-card">
-                    <p>TIES</p><div class="score" id="tie-score">0</div>
-                </div>
-                <div class="score-card" id="cpu-score-card">
-                    <p id="cpu-score-label">O (CPU)</p><div class="score" id="cpu-score">0</div>
-                </div>
-            </footer>
-        </section>
-    </main>
-    
-    <div class="modal-overlay" id="result-modal" role="dialog" aria-modal="true">
-        <div class="modal-content">
-            <p id="modal-result-text"></p>
-            <div id="modal-winner-announcement" class="modal-winner-announcement"></div>
-            <div class="modal-buttons">
-                <button class="btn btn-silver" id="quit-btn">Quit</button>
-                <button class="btn btn-yellow" id="next-round-btn">Next Round</button>
-            </div>
+      <div class="mode-card">
+        <h3>Mode choose karo</h3>
+        <div class="mode-buttons">
+          <button class="mode-btn active" data-mode="1p">
+            <span class="mode-icon">🤖</span>
+            <span class="mode-name">1 Player</span>
+            <span class="mode-desc">vs Computer</span>
+          </button>
+          <button class="mode-btn" data-mode="2p">
+            <span class="mode-icon">👥</span>
+            <span class="mode-name">2 Player</span>
+            <span class="mode-desc">Same device</span>
+          </button>
         </div>
-    </div>
-    
-    <div class="modal-overlay" id="restart-modal" role="dialog" aria-modal="true">
-        <div class="modal-content">
-            <h2>RESTART GAME?</h2>
-            <div class="modal-buttons">
-                <button class="btn btn-silver" id="cancel-restart-btn">No, Cancel</button>
-                <button class="btn btn-yellow" id="confirm-restart-btn">Yes, Restart</button>
-            </div>
-        </div>
-    </div>
+      </div>
 
-</body>
-</html>
+      <div id="diff-card" class="mode-card">
+        <h3>Difficulty</h3>
+        <div class="diff-buttons">
+          <button class="diff-btn" data-diff="easy">Easy</button>
+          <button class="diff-btn active" data-diff="medium">Medium</button>
+          <button class="diff-btn" data-diff="hard">Hard</button>
+        </div>
+      </div>
+
+      <div class="mode-card">
+        <h3>Player 1 ka mark</h3>
+        <div class="mark-buttons">
+          <button class="mark-btn active" data-mark="X">✖ X</button>
+          <button class="mark-btn" data-mark="O">⭕ O</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="start-btn">▶ Start Game</button>
+    </div>
+  </section>
+
+  <!-- ===== GAME SCREEN ===== -->
+  <section id="game-screen" class="screen">
+    <div class="cabinet game-cabinet">
+      <div class="game-header">
+        <div class="logo-small">✖⭕</div>
+        <div class="turn-pill">
+          <span id="turn-icon" class="turn-mark x-mark">✖</span>
+          <span id="turn-text">X ki turn</span>
+        </div>
+        <button id="restart-btn" class="icon-btn" aria-label="Restart"><i class="bi bi-arrow-counterclockwise"></i></button>
+      </div>
+
+      <div class="board" id="board">
+        <button class="cell" data-i="0"></button>
+        <button class="cell" data-i="1"></button>
+        <button class="cell" data-i="2"></button>
+        <button class="cell" data-i="3"></button>
+        <button class="cell" data-i="4"></button>
+        <button class="cell" data-i="5"></button>
+        <button class="cell" data-i="6"></button>
+        <button class="cell" data-i="7"></button>
+        <button class="cell" data-i="8"></button>
+      </div>
+
+      <div class="score-row">
+        <div class="score-card x-card">
+          <span class="score-label" id="p1-label">X (P1)</span>
+          <span class="score-num" id="score-x">0</span>
+        </div>
+        <div class="score-card tie-card">
+          <span class="score-label">TIES</span>
+          <span class="score-num" id="score-tie">0</span>
+        </div>
+        <div class="score-card o-card">
+          <span class="score-label" id="p2-label">O (P2)</span>
+          <span class="score-num" id="score-o">0</span>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="menu-btn">← Menu</button>
+    </div>
+  </section>
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="result-modal">
+  <div class="modal-card">
+    <div id="modal-icon" class="modal-icon"></div>
+    <h2 id="modal-title">X WINS!</h2>
+    <p id="modal-sub" class="modal-sub"></p>
+    <div class="modal-buttons">
+      <button class="btn btn-silver" id="quit-btn">Quit</button>
+      <button class="btn btn-yellow" id="next-round-btn">Next Round</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body></html>
