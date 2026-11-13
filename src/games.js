@@ -15,6 +15,8 @@ export const games = [
     grad: 'from-emerald-500 to-green-700',
     tile: '#14402a',
     heat: 3,
+    img: 'games/snake/assets/snake-graphics.png',
+    imgStyle: 'background-size: 320px 256px; background-position: 0 0; image-rendering: pixelated;',
   },
   {
     id: '2048',
@@ -38,7 +40,7 @@ export const games = [
     tile: '#0b3a5e',
     heat: 3,
     // Real bird sprite (original Flappy Bird art, floppybird assets)
-    img: '/games/flappy/assets/bird.png',
+    img: 'games/flappy/assets/bird.png',
     imgStyle: 'background-size: 68px 192px; background-position: center -64px; image-rendering: pixelated;',
   },
   {
@@ -56,12 +58,12 @@ export const games = [
     id: 'tictactoe',
     title: 'Tic-Tac-Toe',
     emoji: '❌⭕',
-    desc: '2 player same-phone duel!',
-    status: 'soon',
+    desc: '2 player same-phone duel! X vs O.',
+    status: 'ready',
     players: 2,
     grad: 'from-blue-600 to-indigo-700',
     tile: '#1e2a78',
-    heat: 2,
+    heat: 3,
   },
   {
     id: 'reaction',
