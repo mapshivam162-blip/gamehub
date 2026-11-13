@@ -1,0 +1,15 @@
+{
+  "name": "gamehub",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Online + offline games portal (PWA) - ek website, bahut saare games",
+  "type": "module",
+  "scripts": {
+    "dev": "node node_modules/vite/bin/vite.js",
+    "build": "node node_modules/vite/bin/vite.js build",
+    "preview": "node node_modules/vite/bin/vite.js preview"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}

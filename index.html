@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0b1e" />
+  <meta name="description" content="GameHub - ek jagah, bahut saare free games. Online aur offline dono me khelo." />
+  <meta property="og:title" content="GameHub 🎮 — Sab Games Ek Jagah" />
+  <meta property="og:description" content="Free games. No install. Offline bhi chalega. 🔥" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <title>GameHub 🎮 — Sab Games Ek Jagah</title>
+</head>
+<body>
+  <!-- floating background emojis -->
+  <div class="bg-float" aria-hidden="true">
+    <span>🐍</span><span>🔢</span><span>🐤</span><span>🧠</span><span>⚡</span>
+    <span>❌</span><span>🎲</span><span>🕹️</span><span>👾</span><span>🏆</span>
+  </div>
+
+  <div id="app">
+    <header class="topbar">
+      <div class="logo">🎮 <span>GameHub</span></div>
+      <div class="badges">
+        <span id="net-badge" class="badge">…</span>
+        <button id="install-btn" class="btn install hidden">📲 Install</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-pill">✨ 100% Free · No ads · Offline works</div>
+      <h1 class="hero-title">Sab Games,<br /><span class="grad glow">Ek Jagah.</span></h1>
+      <p class="sub">Bore ho rahe ho? Ek tap aur game shuru.<br />Download nahi, login nahi — bas khelo. 🔥</p>
+      <div class="hero-cta">
+        <a href="#games" class="btn primary">▶️ Abhi Khelo</a>
+        <button id="install-btn2" class="btn ghost hidden">📲 App Install Karo</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>6+</b><span>Games</span></div>
+        <div class="stat"><b>0s</b><span>Load time</span></div>
+        <div class="stat"><b>100%</b><span>Free</span></div>
+        <div class="stat"><b>📶</b><span>Offline OK</span></div>
+      </div>
+    </section>
+
+    <section class="spotlight" aria-hidden="false">
+      <div class="spotlight-tag">🔥 COMING NEXT</div>
+      <div class="spotlight-card">
+        <div class="spot-left">
+          <span class="spot-emoji float">🐍</span>
+        </div>
+        <div class="spot-right">
+          <h3>SNAKE</h3>
+          <p>The legendary comeback. Kal se live — ready ho?</p>
+          <span class="spot-btn">Notified raho 🔔</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="games" class="games-section">
+      <div class="section-head">
+        <h2>🕹️ All Games</h2>
+        <span id="game-count" class="muted"></span>
+      </div>
+      <div id="game-grid" class="grid"></div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>🐍 SNAKE</span><span>🔢 2048</span><span>🐤 FLAPPY</span><span>🧠 MEMORY</span><span>⚡ REACTION</span><span>❌⭕ TIC-TAC-TOE</span>
+        <span>🐍 SNAKE</span><span>🔢 2048</span><span>🐤 FLAPPY</span><span>🧠 MEMORY</span><span>⚡ REACTION</span><span>❌⭕ TIC-TAC-TOE</span>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <p>Har hafte naye games 🚧 · Made with 💜 in India</p>
+    </footer>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
