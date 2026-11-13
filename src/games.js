@@ -142,4 +142,15 @@ export const games = [
     tile: '#4a0d1a',
     heat: 3,
   },
+  {
+    id: 'chess',
+    title: 'Chess',
+    emoji: '♟️',
+    desc: 'Classic chess — 2 player, all rules!',
+    status: 'ready',
+    players: 2,
+    grad: 'from-amber-700 to-yellow-900',
+    tile: '#3d2407',
+    heat: 3,
+  },
 ];

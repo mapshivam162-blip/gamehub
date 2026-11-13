@@ -60,14 +60,17 @@ function update() {
   if (player.x < 0) player.x = 0;
   if (player.x + player.w > W) player.x = W - player.w;
 
+  const prevBottom = player.y + player.h;
   player.vy += GRAVITY;
   player.y += player.vy;
+  const currBottom = player.y + player.h;
 
   if (player.vy > 0) {
     for (const p of platforms) {
+      if (p.broken) continue;
       const py = p.y - cameraY;
-      if (player.x + player.w > p.x && player.x < p.x + p.w &&
-          player.y + player.h >= py && player.y + player.h <= py + p.h + 8) {
+      if (!(player.x + player.w > p.x && player.x < p.x + p.w)) continue;
+      if (prevBottom <= py + 4 && currBottom >= py - 2) {
         if (p.type === 'breakable') { p.broken = true; continue; }
         player.y = py - player.h;
         player.vy = JUMP_VEL;

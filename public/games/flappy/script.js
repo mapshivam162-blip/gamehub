@@ -27,7 +27,9 @@ let groundX = 0;
 const birdImg = new Image();
 birdImg.src = 'assets/bird.png';
 
-const scoreEl = document.getElementById('score');
+// bird frame animation
+let birdFrame = 1; // 0,1,2
+let birdFrameTimer = 0;
 const bestEl = document.getElementById('best');
 const overlay = document.getElementById('overlay');
 const ovIcon = document.getElementById('ov-icon');
@@ -84,6 +86,9 @@ function update() {
   bird.vy += GRAVITY;
   bird.y += bird.vy;
   bird.rot = Math.min(Math.max(bird.vy * 0.08, -0.6), 1.2);
+  // bird frame animation
+  birdFrameTimer++;
+  if (birdFrameTimer > 6) { birdFrameTimer = 0; birdFrame = (birdFrame + 1) % 3; }
 
   // ground / ceiling
   if (bird.y + 12 > H - 40) { bird.y = H - 40 - 12; endGame(); return; }
@@ -122,7 +127,8 @@ function endGame() {
     const gp = parseInt(localStorage.getItem('games_played') || '0', 10) + 1;
     localStorage.setItem('games_played', String(gp));
   } catch (e) {}
-  ovIcon.textContent = '💀';
+  const medal = score >= 40 ? '🏆' : score >= 20 ? '🥈' : score >= 10 ? '🥉' : '💀';
+  ovIcon.textContent = medal;
   ovTitle.textContent = 'Game Over!';
   ovSub.textContent = `Score: ${score} · Best: ${best}`;
   startBtn.textContent = '🔁 Play Again';
@@ -147,6 +153,18 @@ function draw() {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
   }
+  // ceiling
+  const ceilingImg = new Image(); ceilingImg.src = 'assets/ceiling.png';
+  if (ceilingImg.complete && ceilingImg.naturalWidth) {
+    const cw = ceilingImg.naturalWidth;
+    for (let i = 0; i < Math.ceil(W / cw) + 1; i++) {
+      ctx.drawImage(ceilingImg, i * cw + (groundX % cw) - cw, 0);
+    }
+  } else {
+    ctx.fillStyle = '#ded895';
+    ctx.fillRect(0, 0, W, 16);
+  }
+
   // clouds
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   for (let i = 0; i < 4; i++) {
@@ -203,9 +221,9 @@ function draw() {
   ctx.translate(bird.x, bird.y);
   ctx.rotate(bird.rot);
   if (birdImg2.complete && birdImg2.naturalWidth) {
-    ctx.drawImage(birdImg2, 0, 32, 34, 32, -17, -16, 34, 32);
+    ctx.drawImage(birdImg2, 0, birdFrame * 32, 34, 32, -17, -16, 34, 32);
   } else if (birdImg.complete && birdImg.naturalWidth) {
-    ctx.drawImage(birdImg, 0, 32, 34, 32, -17, -16, 34, 32);
+    ctx.drawImage(birdImg, 0, birdFrame * 32, 34, 32, -17, -16, 34, 32);
   } else {
     ctx.fillStyle = '#f1c40f';
     ctx.beginPath();
