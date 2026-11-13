@@ -131,4 +131,15 @@ export const games = [
     tile: '#1f2937',
     heat: 3,
   },
+  {
+    id: 'fruitninja',
+    title: 'Fruit Ninja',
+    emoji: '🍉',
+    desc: 'Fruits slice karo, bombs se bache!',
+    status: 'ready',
+    players: 1,
+    grad: 'from-rose-400 to-red-600',
+    tile: '#4a0d1a',
+    heat: 3,
+  },
 ];
