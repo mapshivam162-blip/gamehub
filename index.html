@@ -1,81 +1,262 @@
 <!DOCTYPE html>
-<html lang="hi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a0b1e" />
-  <meta name="description" content="GameHub - ek jagah, bahut saare free games. Online aur offline dono me khelo." />
-  <meta property="og:title" content="GameHub 🎮 — Sab Games Ek Jagah" />
-  <meta property="og:description" content="Free games. No install. Offline bhi chalega. 🔥" />
-  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <title>GameHub 🎮 — Sab Games Ek Jagah</title>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#ECE9FC"/>
+<meta name="description" content="GameHub - ek jagah, bahut saare free games. Online aur offline dono me khelo."/>
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<link rel="manifest" href="/manifest.webmanifest"/>
+<title>GameHub 🎮 — Sab Games Ek Jagah</title>
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            clay: {
+              bg: '#E4E2F5',
+              surface: '#F5F5FC',
+              card: '#FFFFFF',
+              brandBlue: '#2575FC',
+              brandPurple: '#9333EA',
+            }
+          },
+          boxShadow: {
+            'clay-card': '0 12px 28px -6px rgba(110, 117, 160, 0.16), 0 4px 12px -2px rgba(110, 117, 160, 0.08)',
+            'clay-btn': '0 8px 18px -4px rgba(37, 117, 252, 0.45)',
+            'pill-soft': '0 4px 14px 0 rgba(140, 148, 195, 0.18)',
+            'nav-bar': '0 -4px 24px rgba(130, 138, 185, 0.14), 0 10px 30px rgba(0,0,0,0.04)'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Claymorphic Styles -->
+<style data-purpose="clay-effects">
+    body {
+      background: radial-gradient(circle at 50% 0%, #ECE9FC 0%, #DDD8F3 50%, #D4CEF0 100%);
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Hide scrollbars for smooth app-like feel */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Soft 3D bevels for buttons & cards */
+    .tactile-press:active {
+      transform: scale(0.96);
+      transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-header {
+      background: rgba(244, 244, 252, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* Offline dot */
+    #net-dot.offline { background-color: #fb7185 !important; }
+
+    /* Card entrance */
+    .fade-up {
+      animation: fadeUp 0.45s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 110px;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e2333;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 60;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
 </head>
-<body>
-  <!-- floating background emojis -->
-  <div class="bg-float" aria-hidden="true">
-    <span>🐍</span><span>🔢</span><span>🐤</span><span>🧠</span><span>⚡</span>
-    <span>❌</span><span>🎲</span><span>🕹️</span><span>👾</span><span>🏆</span>
-  </div>
-
-  <div id="app">
-    <header class="topbar">
-      <div class="logo">🎮 <span>GameHub</span></div>
-      <div class="badges">
-        <span id="net-badge" class="badge">…</span>
-        <button id="install-btn" class="btn install hidden">📲 Install</button>
-      </div>
-    </header>
-
-    <section class="hero">
-      <div class="hero-pill">✨ 100% Free · No ads · Offline works</div>
-      <h1 class="hero-title">Sab Games,<br /><span class="grad glow">Ek Jagah.</span></h1>
-      <p class="sub">Bore ho rahe ho? Ek tap aur game shuru.<br />Download nahi, login nahi — bas khelo. 🔥</p>
-      <div class="hero-cta">
-        <a href="#games" class="btn primary">▶️ Abhi Khelo</a>
-        <button id="install-btn2" class="btn ghost hidden">📲 App Install Karo</button>
-      </div>
-      <div class="stats">
-        <div class="stat"><b>6+</b><span>Games</span></div>
-        <div class="stat"><b>0s</b><span>Load time</span></div>
-        <div class="stat"><b>100%</b><span>Free</span></div>
-        <div class="stat"><b>📶</b><span>Offline OK</span></div>
-      </div>
-    </section>
-
-    <section class="spotlight" aria-hidden="false">
-      <div class="spotlight-tag">🔥 COMING NEXT</div>
-      <div class="spotlight-card">
-        <div class="spot-left">
-          <span class="spot-emoji float">🐍</span>
-        </div>
-        <div class="spot-right">
-          <h3>SNAKE</h3>
-          <p>The legendary comeback. Kal se live — ready ho?</p>
-          <span class="spot-btn">Notified raho 🔔</span>
-        </div>
-      </div>
-    </section>
-
-    <section id="games" class="games-section">
-      <div class="section-head">
-        <h2>🕹️ All Games</h2>
-        <span id="game-count" class="muted"></span>
-      </div>
-      <div id="game-grid" class="grid"></div>
-    </section>
-
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track">
-        <span>🐍 SNAKE</span><span>🔢 2048</span><span>🐤 FLAPPY</span><span>🧠 MEMORY</span><span>⚡ REACTION</span><span>❌⭕ TIC-TAC-TOE</span>
-        <span>🐍 SNAKE</span><span>🔢 2048</span><span>🐤 FLAPPY</span><span>🧠 MEMORY</span><span>⚡ REACTION</span><span>❌⭕ TIC-TAC-TOE</span>
-      </div>
-    </div>
-
-    <footer class="foot">
-      <p>Har hafte naye games 🚧 · Made with 💜 in India</p>
-    </footer>
-  </div>
-  <script type="module" src="/src/main.js"></script>
-</body>
-</html>
+<body class="font-sans text-slate-800 antialiased flex justify-center">
+<div class="w-full max-w-[420px] min-h-screen relative flex flex-col" id="app">
+<!-- Scrollable Content Viewport -->
+<main class="flex-1 pb-32 pt-1">
+<!-- BEGIN: Top Profile & Balance Header -->
+<section class="px-5 pt-3 pb-3 flex items-center justify-between" data-purpose="profile-currency-bar">
+<!-- User Avatar & Badge -->
+<div class="flex items-center space-x-2.5">
+<div class="relative">
+<!-- Profile avatar -->
+<a href="/profile.html" class="block w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-sky-400 via-indigo-400 to-purple-400 shadow-md tactile-press">
+<div class="w-full h-full rounded-full bg-[#1e2333] border-2 border-white overflow-hidden flex items-center justify-center">
+<div class="w-8 h-8 rounded-lg bg-amber-700/90 relative flex items-center justify-center">
+<div class="w-7 h-4 bg-slate-950 absolute top-0 rounded-t-sm"></div>
+<span class="text-[9px] font-black text-white mt-1">😎</span>
+</div>
+</div>
+</a>
+<!-- Online Indicator Dot -->
+<span id="net-dot" class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full"></span>
+</div>
+<div class="flex flex-col">
+<span id="player-name" class="text-[13px] font-extrabold text-slate-900 tracking-tight leading-none">Gamer_0000</span>
+<a href="/profile.html" class="inline-flex items-center mt-1 px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 text-[10px] font-bold tracking-tight">
+              View Profile
+            </a>
+</div>
+</div>
+<!-- Currency & Install Pill -->
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-2">
+<button id="install-btn" class="hidden items-center bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-pill-soft border border-white space-x-2 text-[11px] font-black text-blue-600">
+<i class="fa-solid fa-download text-[10px]"></i>
+<span>Install</span>
+</button>
+<div class="flex items-center bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-pill-soft border border-white space-x-2">
+<!-- Coin Icon Pill -->
+<div class="w-5 h-5 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 flex items-center justify-center shadow-sm">
+<i class="fa-solid fa-coins text-[10px] text-amber-950"></i>
+</div>
+<span id="coins" class="text-xs font-black text-slate-800 tracking-tight">1,500</span>
+</div>
+</div>
+<button class="text-[10px] font-bold text-blue-500 hover:text-blue-600 mt-1 mr-1 transition-colors" data-toast="Coins system jald aa raha hai 😄" data-purpose="earn-link">
+            How to earn?
+          </button>
+</div>
+</section>
+<!-- END: Top Profile & Balance Header -->
+<!-- BEGIN: Player Statistics Dashboard -->
+<section class="mt-2 px-4" data-purpose="player-statistics">
+<div class="flex items-center justify-between mb-2.5 px-1">
+<h2 class="text-lg font-black text-slate-900 tracking-tight">Statistics</h2>
+<!-- Offline OK Pill -->
+<div id="net-badge" class="flex items-center space-x-1 bg-white/80 border border-slate-200/60 rounded-full px-2.5 py-1 shadow-sm text-[11px] font-bold text-slate-600">
+<i class="fa-solid fa-wifi text-[10px] text-blue-500"></i>
+<span>Online</span>
+</div>
+</div>
+<!-- 2 Statistics Cards -->
+<div class="grid grid-cols-2 gap-3.5">
+<!-- Best Score Card (Purple Tactile 3D Card) -->
+<div class="bg-white rounded-[26px] p-2.5 flex flex-col items-center shadow-clay-card border border-white/80 relative overflow-hidden fade-up">
+<div class="w-full h-20 rounded-[20px] bg-gradient-to-b from-purple-500 to-fuchsia-600 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6),0_6px_16px_rgba(147,51,234,0.28)] flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute -top-4 -left-4 w-20 h-10 bg-white/20 rounded-full blur-[6px] transform rotate-12"></div>
+<div class="w-9 h-8 bg-amber-400 rounded-lg shadow-md flex items-center justify-center border-b-2 border-amber-600 mb-1">
+<i class="fa-solid fa-crown text-amber-900 text-sm"></i>
+</div>
+<span class="text-[11px] font-extrabold text-white/90 tracking-wide uppercase">Best Score</span>
+</div>
+<div class="py-2.5 text-center">
+<span id="stat-best" class="text-xl font-black text-purple-700 tracking-tight">0</span>
+</div>
+</div>
+<!-- Games Played Card (Yellow/Lime Tactile Card) -->
+<div class="bg-white rounded-[26px] p-2.5 flex flex-col items-center shadow-clay-card border border-white/80 relative overflow-hidden fade-up">
+<div class="w-full h-20 rounded-[20px] bg-gradient-to-b from-lime-400 to-lime-500 shadow-[inset_0_2px_4px_rgba(255,255,255,0.7),0_6px_16px_rgba(132,204,22,0.22)] flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute -top-4 -left-4 w-20 h-10 bg-white/25 rounded-full blur-[6px] transform rotate-12"></div>
+<div class="w-8 h-8 bg-slate-800 rounded-full shadow-md flex items-center justify-center border-2 border-slate-700 mb-1">
+<i class="fa-solid fa-gamepad text-amber-400 text-xs"></i>
+</div>
+<span class="text-[11px] font-extrabold text-white/95 tracking-wide uppercase">Games Played</span>
+</div>
+<div class="py-2.5 text-center">
+<span id="stat-played" class="text-xl font-black text-lime-700 tracking-tight">0</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Player Statistics Dashboard -->
+<!-- BEGIN: Recommended Games Section -->
+<section class="mt-6 px-3" data-purpose="recommended-games-section">
+<!-- Section Title -->
+<div class="flex items-center justify-between px-2 mb-3">
+<h2 class="text-xl font-black text-slate-900 tracking-tight">Recommended games</h2>
+<span id="games-count" class="text-[11px] font-bold text-slate-400"></span>
+</div>
+<!-- Filter Tags / Pill List -->
+<div class="flex items-center space-x-2 overflow-x-auto no-scrollbar px-1 py-1 -mt-1 mb-2" data-purpose="filter-pills">
+<!-- Active Pill: All -->
+<button data-filter="all" class="filter-pill flex items-center space-x-1.5 bg-white px-3.5 py-1.5 rounded-full shadow-pill-soft border-2 border-pink-200/80 text-slate-800 text-xs font-bold whitespace-nowrap active:scale-95 transition-transform">
+<span class="w-4 h-4 rounded-full bg-pink-100 flex items-center justify-center text-[10px] text-pink-500">⭐</span>
+<span>All</span>
+</button>
+<!-- 1 Player Pill -->
+<button data-filter="1p" class="filter-pill flex items-center space-x-1.5 bg-white/70 hover:bg-white px-3.5 py-1.5 rounded-full text-slate-600 text-xs font-bold whitespace-nowrap shadow-sm border border-slate-200/50 active:scale-95 transition-transform">
+<span class="w-4 h-4 rounded-full bg-amber-100 flex items-center justify-center text-[10px] text-amber-500">👤</span>
+<span>1 Player</span>
+</button>
+<!-- 2 Player Pill -->
+<button data-filter="2p" class="filter-pill flex items-center space-x-1.5 bg-white/70 hover:bg-white px-3.5 py-1.5 rounded-full text-slate-600 text-xs font-bold whitespace-nowrap shadow-sm border border-slate-200/50 active:scale-95 transition-transform">
+<span class="w-4 h-4 rounded-full bg-cyan-100 flex items-center justify-center text-[10px] text-cyan-600">👥</span>
+<span>2 Player</span>
+</button>
+</div>
+<!-- 2-Column Game Card Grid -->
+<div class="grid grid-cols-2 gap-3.5 mt-2" data-purpose="games-grid" id="games-grid">
+<!-- Cards main.js se render hote hain -->
+</div>
+</section>
+<!-- END: Recommended Games Section -->
+</main>
+<!-- BEGIN: Floating Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white/95 backdrop-blur-md pt-3 pb-7 px-8 border-t border-slate-100 shadow-nav-bar flex items-center justify-between rounded-t-[32px] z-50" data-purpose="bottom-navigation-bar" style="padding-bottom: max(1.75rem, env(safe-area-inset-bottom));">
+<!-- Home Tab (Active) -->
+<a href="/" class="flex flex-col items-center group tactile-press">
+<div class="w-10 h-7 flex items-center justify-center text-blue-600 text-xl">
+<i class="fa-solid fa-house"></i>
+</div>
+<span class="text-[11px] font-extrabold text-blue-600 tracking-tight">Home</span>
+</a>
+<!-- Profile Tab -->
+<a href="/profile.html" class="flex flex-col items-center group tactile-press">
+<div class="w-10 h-7 flex items-center justify-center text-slate-400 group-hover:text-slate-600 text-xl transition-colors">
+<i class="fa-solid fa-user"></i>
+</div>
+<span class="text-[11px] font-bold text-slate-400 group-hover:text-slate-600 tracking-tight">Profile</span>
+</a>
+<!-- Settings Tab -->
+<button data-toast="Settings jald aa rahe hain ⚙️" class="flex flex-col items-center group tactile-press">
+<div class="w-10 h-7 flex items-center justify-center text-slate-400 group-hover:text-slate-600 text-xl transition-colors">
+<i class="fa-solid fa-gear"></i>
+</div>
+<span class="text-[11px] font-bold text-slate-400 group-hover:text-slate-600 tracking-tight">Settings</span>
+</button>
+</nav>
+<!-- END: Floating Bottom Navigation Bar -->
+<!-- Toast -->
+<div id="toast"></div>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body></html>

@@ -1,6 +1,8 @@
 // GameHub game registry
-// Naya game add karna? Yahan ek entry + games/<id>/ folder banao.
-// status: 'ready' = portal se link khulega | 'soon' = locked card dikhega
+// Naya game add karna? Yahan ek entry + games/<id>/index.html banao.
+// status: 'ready' = Play button live | 'soon' = 🔒 Soon button
+// grad: Tailwind gradient classes for the app-icon tile
+// tile: dark inner color of the icon tile
 
 export const games = [
   {
@@ -10,6 +12,9 @@ export const games = [
     desc: 'Classic wala snek. Khana khao, lamba bano.',
     status: 'ready',
     players: 1,
+    grad: 'from-emerald-500 to-green-700',
+    tile: '#14402a',
+    heat: 3,
   },
   {
     id: '2048',
@@ -18,6 +23,9 @@ export const games = [
     desc: 'Tiles slide karo, merge karo, 2048 banao.',
     status: 'soon',
     players: 1,
+    grad: 'from-amber-400 to-orange-500',
+    tile: '#3d2407',
+    heat: 2,
   },
   {
     id: 'flappy',
@@ -26,6 +34,9 @@ export const games = [
     desc: 'Tap tap, pipes ke beech se niklo.',
     status: 'soon',
     players: 1,
+    grad: 'from-sky-400 to-blue-600',
+    tile: '#0b3a5e',
+    heat: 2,
   },
   {
     id: 'memory',
@@ -34,6 +45,9 @@ export const games = [
     desc: 'Cards yaad rakho, sab match karo.',
     status: 'soon',
     players: 1,
+    grad: 'from-fuchsia-500 to-purple-700',
+    tile: '#3b1053',
+    heat: 1,
   },
   {
     id: 'tictactoe',
@@ -42,6 +56,9 @@ export const games = [
     desc: '2 player same-phone duel!',
     status: 'soon',
     players: 2,
+    grad: 'from-blue-600 to-indigo-700',
+    tile: '#1e2a78',
+    heat: 2,
   },
   {
     id: 'reaction',
@@ -50,5 +67,8 @@ export const games = [
     desc: 'Kitne fast ho? Speed test karo.',
     status: 'soon',
     players: 1,
+    grad: 'from-rose-500 to-red-600',
+    tile: '#4a0d1a',
+    heat: 1,
   },
 ];

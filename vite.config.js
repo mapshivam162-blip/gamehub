@@ -8,5 +8,11 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: new URL('./index.html', import.meta.url).pathname,
+        profile: new URL('./profile.html', import.meta.url).pathname,
+      },
+    },
   },
 });
