@@ -107,6 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initialize Game ---
     initializeGame();
     
+    // --- Mode UI ---
+    if (typeof setupModeUI === 'function') setupModeUI();
+    
+    // --- Hint button ---
+    const hintBtn = document.getElementById('hint-button');
+    if (hintBtn) hintBtn.addEventListener('click', () => { if (typeof showHint === 'function') showHint(); });
+    
     // --- Initialize Feature Modules ---
     initializeFeatureModules();
 }); 

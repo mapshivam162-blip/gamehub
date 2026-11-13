@@ -6,6 +6,9 @@ let boardState = getInitialPieces();
 let currentPlayer = WHITE;
 let moveHistory = []; // Array of move objects { from: {row, col}, to: {row, col}, piece: Piece, captured: Piece|null }
 let isGameOver = false;
+let gameMode = '2p'; // '2p' or 'ai'
+let aiDifficulty = 'easy';
+let aiThinking = false;
 let kingPositions = { // Keep track of king positions for check detection
     [WHITE]: { row: 7, col: 4 },
     [BLACK]: { row: 0, col: 4 }
@@ -92,6 +95,7 @@ function resetGame() {
     currentPlayer = WHITE;
     moveHistory = [];
     isGameOver = false;
+    aiThinking = false;
     kingPositions = {
         [WHITE]: { row: 7, col: 4 },
         [BLACK]: { row: 0, col: 4 }
@@ -289,6 +293,13 @@ function makeMove(startRow, startCol, endRow, endCol) {
     updateStatusDisplay();
     updateMoveHistoryDisplay();
     updateBoardVisuals(boardState, opponentKingInCheck);
+    // Trigger AI move if needed
+    if (gameMode === 'ai' && currentPlayer === BLACK && !isGameOver && !aiThinking) {
+        aiThinking = true;
+        currentStatus = '🤖 Robot soch raha hai...';
+        updateStatusDisplay();
+        setTimeout(makeAIMove, 400);
+    }
     // Sounds
     try {
         if (isGameOver) {
@@ -1022,12 +1033,149 @@ function generateNotationWithDisambiguation(move, boardBefore) {
     return notation;
 }
 
+// ---- AI (Robot) ----
+const PIECE_VALUES = { pawn: 1, knight: 3, bishop: 3, rook: 5, queen: 9, king: 0 };
+
+function evaluateBoard(bs) {
+    let sc = 0;
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const p = bs[r][c];
+            if (p) {
+                const v = PIECE_VALUES[p.type] || 0;
+                sc += (p.color === BLACK ? v : -v);
+            }
+        }
+    }
+    return sc;
+}
+
+function cloneBoard(bs) {
+    return bs.map(row => row.map(cell => cell ? new Piece(cell.type, cell.color) : null));
+}
+
+function applyMoveToClone(bs, move) {
+    const piece = bs[move.from.row][move.from.col];
+    bs[move.to.row][move.to.col] = piece;
+    bs[move.from.row][move.from.col] = null;
+    if (piece && piece.type === PAWN && (move.to.row === 0 || move.to.row === 7)) {
+        bs[move.to.row][move.to.col] = new Piece(QUEEN, piece.color);
+    }
+}
+
+function aiChooseMove() {
+    const moves = generateAllLegalMoves(BLACK);
+    if (moves.length === 0) return null;
+    if (aiDifficulty === 'easy') {
+        return moves[Math.floor(Math.random() * moves.length)];
+    }
+    let bestMove = null;
+    let bestScore = -Infinity;
+    for (const m of moves) {
+        const clone = cloneBoard(boardState);
+        applyMoveToClone(clone, m);
+        let sc = evaluateBoard(clone);
+        const captured = boardState[m.to.row][m.to.col];
+        if (captured) sc += (PIECE_VALUES[captured.type] || 0) * 0.5;
+        if (aiDifficulty === 'medium') sc += (Math.random() - 0.5) * 3;
+        if (sc > bestScore) { bestScore = sc; bestMove = m; }
+    }
+    return bestMove;
+}
+
+function makeAIMove() {
+    if (isGameOver) { aiThinking = false; return; }
+    const m = aiChooseMove();
+    aiThinking = false;
+    if (m) makeMove(m.from.row, m.from.col, m.to.row, m.to.col);
+}
+
+function setupModeUI() {
+    const mode2p = document.getElementById('mode-2p');
+    const modeAi = document.getElementById('mode-ai');
+    const diffRow = document.getElementById('diff-row');
+    if (!mode2p || !modeAi) return;
+    mode2p.addEventListener('click', () => {
+        mode2p.classList.add('active');
+        modeAi.classList.remove('active');
+        gameMode = '2p';
+        if (diffRow) diffRow.style.display = 'none';
+    });
+    modeAi.addEventListener('click', () => {
+        modeAi.classList.add('active');
+        mode2p.classList.remove('active');
+        gameMode = 'ai';
+        if (diffRow) diffRow.style.display = 'flex';
+    });
+    document.querySelectorAll('.diff-btn').forEach(b => {
+        b.addEventListener('click', () => {
+            document.querySelectorAll('.diff-btn').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            aiDifficulty = b.dataset.diff;
+        });
+    });
+}
+
+// ---- Hint ----
+function getBestMoveForColor(color) {
+    const moves = generateAllLegalMoves(color);
+    if (moves.length === 0) return null;
+    const PIECE_VALUES2 = { pawn: 1, knight: 3, bishop: 3, rook: 5, queen: 9, king: 0 };
+    function evalBoard(bs) {
+        let sc = 0;
+        for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+            const p = bs[r][c];
+            if (p) {
+                const v = PIECE_VALUES2[p.type] || 0;
+                sc += (p.color === color ? v : -v);
+            }
+        }
+        return sc;
+    }
+    function cloneB(bs) { return bs.map(row => row.map(cell => cell ? new Piece(cell.type, cell.color) : null)); }
+    let bestMove = null, bestScore = -Infinity;
+    for (const m of moves) {
+        const clone = cloneB(boardState);
+        const piece = clone[m.from.row][m.from.col];
+        clone[m.to.row][m.to.col] = piece;
+        clone[m.from.row][m.from.col] = null;
+        if (piece && piece.type === PAWN && (m.to.row === 0 || m.to.row === 7)) {
+            clone[m.to.row][m.to.col] = new Piece(QUEEN, piece.color);
+        }
+        let sc = evalBoard(clone);
+        const captured = boardState[m.to.row][m.to.col];
+        if (captured) sc += (PIECE_VALUES2[captured.type] || 0) * 0.5;
+        sc += Math.random() * 0.5;
+        if (sc > bestScore) { bestScore = sc; bestMove = m; }
+    }
+    return bestMove;
+}
+
+function showHint() {
+    if (isGameOver || aiThinking) return;
+    const m = getBestMoveForColor(currentPlayer);
+    if (!m) return;
+    // Select the piece and show its moves
+    clearSelectedSquare();
+    clearPossibleMoves();
+    setSelectedSquare(m.from.row, m.from.col);
+    setPossibleMoves(generateLegalMovesForPiece(m.from.row, m.from.col));
+    // Highlight the suggested destination
+    const destCell = document.querySelector(`.square[data-row="${m.to.row}"][data-col="${m.to.col}"]`);
+    if (destCell) {
+        destCell.style.boxShadow = 'inset 0 0 0 4px rgba(255, 165, 0, 0.8)';
+        setTimeout(() => { if (destCell) destCell.style.boxShadow = ''; }, 2000);
+    }
+    updateBoardVisuals(boardState, findKingInCheck(currentPlayer));
+}
+
 // Expose handleBoardClick and related functions globally for drag.js and other modules
 if (typeof window !== 'undefined') {
     window.handleBoardClick = handleBoardClick;
     window.generateLegalMovesForPiece = generateLegalMovesForPiece;
     window.findKingInCheck = findKingInCheck;
     window.makeMove = makeMove;
+    window.showHint = showHint;
     // Expose state getters (selectedSquare and possibleMoves are in board.js)
     Object.defineProperty(window, 'boardState', {
         get: function() { return boardState; }

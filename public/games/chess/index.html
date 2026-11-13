@@ -46,6 +46,15 @@
                 <div class="captured-row" id="captured-white"></div>
             </div>
             <div class="game-info">
+                <div class="mode-row">
+                    <button id="mode-2p" class="mode-btn active">👥 2 Player</button>
+                    <button id="mode-ai" class="mode-btn">🤖 vs Robot</button>
+                </div>
+                <div class="diff-row" id="diff-row" style="display:none;">
+                    <button class="diff-btn active" data-diff="easy">Easy</button>
+                    <button class="diff-btn" data-diff="medium">Medium</button>
+                    <button class="diff-btn" data-diff="hard">Hard</button>
+                </div>
                 <div class="status-bar" id="game-status">White's turn</div>
                 <div class="captured-row" id="captured-black"></div>
                 <h2>Move History</h2>
@@ -75,6 +84,7 @@
                 </div>
                 <div class="buttons-row">
                     <button id="undo-button" aria-label="Undo last move">Undo</button>
+                    <button id="hint-button" aria-label="Hint">💡 Hint</button>
                     <button id="pgn-button" aria-label="Copy PGN">PGN</button>
                     <button id="reset-button">New Game</button>
                 </div>
