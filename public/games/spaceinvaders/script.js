@@ -252,7 +252,6 @@ function loop() {
 }
 
 // Input
-const canvas = document.getElementById('board');
 document.getElementById('btn-left').addEventListener('click', () => { moveDir = -1; setTimeout(() => moveDir = 0, 120); });
 document.getElementById('btn-right').addEventListener('click', () => { moveDir = 1; setTimeout(() => moveDir = 0, 120); });
 document.getElementById('btn-shoot').addEventListener('click', shoot);

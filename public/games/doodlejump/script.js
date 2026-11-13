@@ -184,7 +184,6 @@ function loop() {
 }
 
 // Input
-const canvas = document.getElementById('board');
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
   const r = canvas.getBoundingClientRect();
