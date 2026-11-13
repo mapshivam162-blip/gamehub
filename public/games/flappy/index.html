@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#4ec0ca"/>
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<title>Flappy Bird 🐤 — GameHub</title>
+<link href="css/reset.css" rel="stylesheet"/>
+<link href="css/main.css" rel="stylesheet"/>
+<style>
+  /* GameHub additions */
+  #back-btn {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: 12px;
+    z-index: 999;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.92);
+    border: 2px solid #0b3a5e;
+    box-shadow: 0 3px 0 #092c47;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #092c47; }
+
+  #footer {
+    background: rgba(0,0,0,0.35);
+    padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+    text-align: center;
+  }
+  #footer a {
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    margin: 0 6px;
+  }
+
+  /* touch target behtar karo: poora screen clickable hai already (touchstart) */
+  body {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<div id="gamecontainer">
+   <div id="gamescreen">
+      <div id="sky" class="animated">
+         <div id="flyarea">
+            <div id="ceiling" class="animated"></div>
+            <!-- Flying aur pipe area -->
+            <div id="player" class="bird animated"></div>
+
+            <div id="bigscore"></div>
+
+            <div id="splash"></div>
+
+            <div id="scoreboard">
+               <div id="medal"></div>
+               <div id="currentscore"></div>
+               <div id="highscore"></div>
+               <div id="replay"><img src="assets/replay.png" alt="replay"></div>
+            </div>
+
+            <!-- Pipes yahan aate hain! -->
+         </div>
+      </div>
+      <div id="land" class="animated"><div id="debug"></div></div>
+   </div>
+</div>
+<a id="back-btn" href="/" aria-label="Home pe wapas jao">←</a>
+<div id="footer">
+   <a href="https://www.dotgears.com/">original game/art by Dong Nguyen</a>
+   <a href="https://github.com/nebez/floppybird/">code: floppybird (Apache 2.0)</a>
+</div>
+<div class="boundingbox" id="playerbox"></div>
+<div class="boundingbox" id="pipebox"></div>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.transit.min.js"></script>
+<script src="js/buzz.min.js"></script>
+<script src="js/main.js"></script>
+</body></html>

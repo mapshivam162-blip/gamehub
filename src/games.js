@@ -31,12 +31,15 @@ export const games = [
     id: 'flappy',
     title: 'Flappy Bird',
     emoji: '🐤',
-    desc: 'Tap tap, pipes ke beech se niklo.',
-    status: 'soon',
+    desc: 'Real bird wala classic! Tap karo, pipes cross karo.',
+    status: 'ready',
     players: 1,
     grad: 'from-sky-400 to-blue-600',
     tile: '#0b3a5e',
-    heat: 2,
+    heat: 3,
+    // Real bird sprite (original Flappy Bird art, floppybird assets)
+    img: '/games/flappy/assets/bird.png',
+    imgStyle: 'background-size: 68px 192px; background-position: center -64px; image-rendering: pixelated;',
   },
   {
     id: 'memory',

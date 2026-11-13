@@ -74,8 +74,10 @@ function renderGames() {
         <div class="bg-white rounded-[28px] p-3 shadow-clay-card border border-white flex flex-col items-center text-center fade-up" style="animation-delay:${i * 60}ms">
           <div class="w-16 h-16 rounded-[22px] bg-gradient-to-tr ${g.grad} shadow-md p-0.5 mb-2.5 overflow-hidden">
             <div class="w-full h-full rounded-[20px] flex flex-col items-center justify-center gap-0.5" style="background:${g.tile}">
-              <span class="text-xl leading-none">${g.emoji}</span>
-              <span class="text-[7px] tracking-tighter uppercase font-extrabold text-white/80 leading-none">${g.title.split(' ')[0]}</span>
+              ${g.img
+                ? `<div style="width:100%;height:100%;background-image:url('${g.img}');background-repeat:no-repeat;${g.imgStyle || ''}"></div>`
+                : `<span class="text-xl leading-none">${g.emoji}</span>
+              <span class="text-[7px] tracking-tighter uppercase font-extrabold text-white/80 leading-none">${g.title.split(' ')[0]}</span>`}
             </div>
           </div>
           <h3 class="text-[13px] font-black text-slate-900 truncate w-full">${g.title}</h3>

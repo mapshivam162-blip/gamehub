@@ -1,7 +1,9 @@
 /* GameHub service worker — offline support
-   Strategy: app shell pehle se cache, baaki runtime pe cache hota jaata hai. */
+   Strategy:
+   - Apne pages/JS/CSS: network-first (naya content turant), offline pe cache
+   - CDN (Tailwind/fonts/icons/images): cache-first (fast) + background update */
 
-const CACHE = 'gamehub-v3';
+const CACHE = 'gamehub-v4';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg', '/icon-maskable.svg'];
 
 self.addEventListener('install', (e) => {
@@ -21,20 +23,33 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  const sameOrigin = url.origin === self.location.origin;
 
-  e.respondWith(
-    caches.match(e.request).then((cached) => {
-      const network = fetch(e.request)
-        .then((res) => {
-          // CDN (Tailwind/fonts/icons) bhi cache karo — offline ke liye
-          if (res.ok || res.type === 'opaque') {
-            const copy = res.clone();
-            caches.open(CACHE).then((cache) => cache.put(e.request, copy));
-          }
-          return res;
-        })
-        .catch(() => cached || caches.match('/index.html'));
-      return cached || network;
-    })
-  );
+  const saveToCache = (res) => {
+    if (res.ok || res.type === 'opaque') {
+      const copy = res.clone();
+      caches.open(CACHE).then((cache) => cache.put(e.request, copy));
+    }
+    return res;
+  };
+
+  if (sameOrigin) {
+    // Network-first: naya content hamesha, offline pe cache fallback
+    e.respondWith(
+      fetch(e.request)
+        .then(saveToCache)
+        .catch(() => caches.match(e.request).then((c) => c || caches.match('/index.html')))
+    );
+  } else {
+    // CDN: cache-first + background refresh
+    e.respondWith(
+      caches.match(e.request).then((cached) => {
+        const network = fetch(e.request)
+          .then(saveToCache)
+          .catch(() => cached);
+        return cached || network;
+      })
+    );
+  }
 });
