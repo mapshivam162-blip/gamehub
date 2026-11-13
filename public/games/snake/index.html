@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="hi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0b1e" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <title>Snake 🐍 — GameHub</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="root">
+      <div class="hud">
+        <a class="back" href="/">🏠 Portal</a>
+        <div class="scores">
+          <h1 id="score"></h1>
+          <h1 id="best-score"></h1>
+        </div>
+        <button id="pauseBtn" type="button">⏸ Pause</button>
+      </div>
+      <canvas id="board" width="600" height="600"></canvas>
+      <p class="hint">Swipe = move · ⏸ = pause · Keyboard bhi chalega (arrows / WASD)</p>
+    </div>
+    <div id="overlay" class="visible">
+      <div class="overlay__container">
+        <h1 id="overlay__head">Snake Game</h1>
+        <div class="overlayGrid">
+          <div>Best Score:</div>
+          <div id="leader__score">0</div>
+          <div class="option">Theme:</div>
+          <div><select id="theme"></select></div>
+          <div class="option">Difficulty:</div>
+          <div><select id="difficulty"></select></div>
+          <div class="option">Sounds:</div>
+          <div class="soundToggleWrapper">
+            <input type="checkbox" id="audio" />
+            <label for="audio"></label>
+          </div>
+        </div>
+        <button id="toggleButton">Start Game</button>
+        <button id="ObjectiveButton">Objective</button>
+        <button id="ControlButton">Controls</button>
+      </div>
+      <div id="overlay_control" class="visible_control">
+        <div class="overlay__container">
+          <h1 id="overlay__head">Controls</h1>
+          <div class="overlayGrid_">
+            <ul>
+              <li>
+                <p>📱 <b>Swipe</b> on the board to move the Snake.</p>
+              </li>
+              <li>
+                <p>⏸ Tap <b>Pause</b> to pause and return to Main Menu.</p>
+              </li>
+              <li>
+                <p>⌨️ Arrow keys / <b>WASD</b> bhi kaam karte hain.</p>
+              </li>
+            </ul>
+          </div>
+          <button id="MainButton1">Let's Begin</button>
+        </div>
+      </div>
+      <div id="overlay_objective" class="visible_objective">
+        <div class="overlay__container">
+          <h1 id="overlay__head">Objective</h1>
+          <div class="overlayGrid_">
+            <ul>
+              <li>Feed the Hungry Snake by moving it across the field.</li>
+              <li>Snake will pass the boundary and will enter from opposite side.</li>
+              <li>You will lose the Game if the Snake eats itself.</li>
+            </ul>
+          </div>
+          <button id="MainButton2">Let's Begin</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal">
+      <h1 class="modal-text">Game Over! Tap or press any key 🔁</h1>
+    </div>
+  </body>
+  <script type="module" src="./js/index.js"></script>
+</html>

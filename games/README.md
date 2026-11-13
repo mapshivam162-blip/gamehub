@@ -12,8 +12,8 @@ games/<game-id>/
 Aur `src/games.js` me registry me entry add karo, status `'ready'` kar do —
 portal ke grid me card live ho jayega aur offline me bhi chalega.
 
-## Kal (Day 1) target
-- [ ] Snake 🐍
+## Status
+- [x] Snake 🐍 (live! based on devsargam/SnakeGame, MIT)
 - [ ] Reaction Test ⚡
 
 ## Baad me

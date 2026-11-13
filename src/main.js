@@ -9,7 +9,7 @@ function renderGames() {
   grid.innerHTML = games
     .map((g) => {
       const ready = g.status === 'ready';
-      const href = `/games/${g.id}/`;
+      const href = `/games/${g.id}/index.html`;
       const playerTag = g.players === 2 ? '👥 2P' : '👤 1P';
       const inner = `
         <div class="card-top">

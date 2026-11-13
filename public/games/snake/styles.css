@@ -1,0 +1,347 @@
+/* Snake — GameHub (adapted for portal)
+   Original game CSS: devsargam/SnakeGame (MIT) — modified: fonts, dark theme,
+   responsive canvas, mobile HUD. */
+
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  --bg: #0a0b1e;
+  --card: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(255, 255, 255, 0.12);
+  --text: #f1f3ff;
+  --muted: #9aa3c7;
+  --accent: #7c6cff;
+  --accent2: #4dd9e8;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.root {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* HUD */
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(92vw, 600px);
+  margin-top: 10px;
+}
+
+.back {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+
+#pauseBtn {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0b0d1c;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.scores {
+  font-size: 22px;
+  display: flex;
+  gap: 14px;
+}
+
+.scores h1 {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin: 6px 0 18px;
+  text-align: center;
+  padding-inline: 12px;
+}
+
+#board {
+  background-color: black;
+  margin: 0.6rem 0;
+  border: 4px solid var(--accent);
+  border-radius: 10px;
+  /* fixed canvas ko phone pe fit karo */
+  width: min(92vw, 600px);
+  height: auto;
+  touch-action: none; /* swipe ke waqt page scroll na ho */
+}
+
+/* Overlay screens */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 99;
+  background-color: rgba(5, 6, 18, 0.85);
+  backdrop-filter: blur(6px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.overlay__container {
+  position: absolute;
+  background-color: #141632;
+  border: 1px solid var(--card-border);
+  padding: 1.6em;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text);
+  text-align: center;
+  width: 84%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+}
+
+.overlayGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-size: 1.05em;
+  padding: 1em;
+  justify-items: left;
+  max-width: 340px;
+  align-self: center;
+  align-items: center;
+  line-height: 40px;
+}
+
+#overlay__head {
+  font-size: 2em;
+  color: var(--accent2);
+  font-weight: 900;
+}
+
+#toggleButton,
+#MainButton1,
+#MainButton2 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 15px;
+  color: #0b0d1c;
+  cursor: pointer;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  margin-top: 10px;
+  transition: 0.25s all ease;
+}
+
+#toggleButton:hover,
+#MainButton1:hover,
+#MainButton2:hover {
+  filter: brightness(1.15);
+}
+
+.visible {
+  display: flex !important;
+}
+
+#difficulty,
+#theme {
+  padding: 0.45em;
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  background-color: #0f1226;
+  color: var(--text);
+  font-size: 0.75em;
+  min-width: 110px;
+  max-width: 140px;
+}
+
+.soundToggleWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.option {
+  color: var(--muted);
+}
+
+input[type="checkbox"] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+label {
+  cursor: pointer;
+  width: 55px;
+  height: 30px;
+  background: #3a3f66;
+  display: block;
+  border-radius: 70px;
+  position: relative;
+  transition: 0.3s ease-in-out;
+}
+
+label:after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 60px;
+  transition: 0.3s ease-in-out;
+}
+
+input:checked + label {
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+}
+
+input:checked + label:after {
+  left: calc(100% - 5px);
+  transform: translateX(-100%);
+}
+
+/* Game over modal */
+.modal {
+  display: none;
+  position: fixed;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  height: fit-content;
+  max-width: 420px;
+  width: 84%;
+  padding: 32px 24px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 92, 168, 0.5);
+  box-shadow: 0 0 40px rgba(255, 92, 168, 0.35);
+  background-color: #141632;
+  color: var(--text);
+  z-index: 100;
+  cursor: pointer;
+}
+
+.modal-text {
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+#ControlButton {
+  margin-top: 10px;
+  background-color: #f37736;
+  transition: 0.4s all ease;
+  font-size: 1.3rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+
+#ObjectiveButton {
+  margin-top: 10px;
+  background-color: #57b000;
+  transition: 0.4s all ease;
+  font-size: 1.3rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+
+#overlay_control,
+#overlay_objective {
+  visibility: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 99;
+  background-color: rgba(5, 6, 18, 0.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.overlayGrid_ {
+  display: grid;
+  font-size: 1.05em;
+  padding: 1em;
+  justify-items: left;
+  max-width: 340px;
+  align-self: center;
+  align-items: center;
+  line-height: 34px;
+  text-align: left;
+}
+
+.overlayGrid_ ul {
+  list-style: none;
+  color: var(--muted);
+}
+
+.overlayGrid_ li {
+  margin-bottom: 12px;
+}
+
+@media (max-width: 480px) {
+  .overlayGrid {
+    line-height: 34px;
+    font-size: 0.95em;
+  }
+
+  .scores {
+    font-size: 17px;
+    gap: 10px;
+  }
+
+  .scores h1 {
+    font-size: 17px;
+  }
+
+  .modal-text {
+    font-size: 1.05rem;
+  }
+}

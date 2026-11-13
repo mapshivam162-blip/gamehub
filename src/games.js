@@ -8,7 +8,7 @@ export const games = [
     title: 'Snake',
     emoji: '🐍',
     desc: 'Classic wala snek. Khana khao, lamba bano.',
-    status: 'soon',
+    status: 'ready',
     players: 1,
   },
   {

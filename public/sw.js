@@ -1,7 +1,7 @@
 /* GameHub service worker — offline support
    Strategy: app shell pehle se cache, baaki runtime pe cache hota jaata hai. */
 
-const CACHE = 'gamehub-v1';
+const CACHE = 'gamehub-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg', '/icon-maskable.svg'];
 
 self.addEventListener('install', (e) => {
