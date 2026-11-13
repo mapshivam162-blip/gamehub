@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#ECE9FC"/>
+<meta name="description" content="GameHub Settings"/>
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<link rel="manifest" href="/manifest.webmanifest"/>
+<title>Settings ⚙️ — GameHub</title>
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          boxShadow: {
+            'clay-card': '0 12px 28px -6px rgba(110, 117, 160, 0.16), 0 4px 12px -2px rgba(110, 117, 160, 0.08)',
+            'pill-soft': '0 4px 14px 0 rgba(140, 148, 195, 0.18)',
+            'nav-bar': '0 -4px 24px rgba(130, 138, 185, 0.14), 0 10px 30px rgba(0,0,0,0.04)'
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background: radial-gradient(circle at 50% 0%, #ECE9FC 0%, #DDD8F3 50%, #D4CEF0 100%);
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .tactile-press:active { transform: scale(0.96); transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    /* Avatar chip */
+    .avatar-chip {
+      width: 3rem; height: 3rem;
+      border-radius: 999px;
+      background: #F1EFF9;
+      border: 3px solid transparent;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 10px rgba(110, 117, 160, 0.18);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .avatar-chip.selected {
+      border-color: #2575FC;
+      background: #E3EDFF;
+      transform: scale(1.1);
+    }
+    .avatar-chip:active { transform: scale(0.9); }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 110px;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e2333;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 60;
+      white-space: nowrap;
+      max-width: 92vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #name-input {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-800 antialiased flex justify-center">
+<div class="w-full max-w-[420px] min-h-screen relative flex flex-col">
+<main class="flex-1 pb-32 pt-1" style="padding-top: max(0.25rem, env(safe-area-inset-top));">
+
+<!-- Header -->
+<section class="px-5 pt-4 pb-2 flex items-center gap-3">
+<a href="/" class="w-10 h-10 rounded-full bg-white shadow-pill-soft flex items-center justify-center text-blue-600 tactile-press" aria-label="Home">
+<i class="fa-solid fa-arrow-left text-sm"></i>
+</a>
+<h1 class="text-2xl font-black text-slate-900 tracking-tight">Settings ⚙️</h1>
+</section>
+
+<!-- Player Card -->
+<section class="mx-4 mt-3 bg-white rounded-[26px] p-4 shadow-clay-card border border-white/80">
+<div class="flex items-center gap-3">
+<div id="settings-avatar" class="w-14 h-14 rounded-full bg-[#1e2333] border-2 border-white shadow-md flex items-center justify-center text-2xl shrink-0">😎</div>
+<div class="flex-1 min-w-0">
+<h2 class="text-sm font-black text-slate-900 tracking-tight">Player Profile</h2>
+<p class="text-[11px] font-bold text-slate-400 mt-0.5">Naam aur avatar badlo</p>
+</div>
+</div>
+<!-- Name edit -->
+<label class="block mt-3 text-[11px] font-black text-slate-500 uppercase tracking-wide">Player Name</label>
+<div class="mt-1.5 flex items-center gap-2">
+<input id="name-input" type="text" maxlength="16" minlength="2" class="flex-1 min-w-0 bg-[#F5F5FC] border-2 border-slate-200/70 rounded-full px-4 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:border-blue-400" placeholder="Player name"/>
+<button id="save-name" class="px-4 py-2 rounded-full bg-blue-600 text-white font-black text-xs shadow-[0_8px_18px_-4px_rgba(37,117,252,0.45)] tactile-press shrink-0">
+          Save
+        </button>
+</div>
+<!-- Avatar picker -->
+<label class="block mt-4 text-[11px] font-black text-slate-500 uppercase tracking-wide">Avatar (5 random icons)</label>
+<div class="mt-2 flex items-center justify-between gap-1">
+<div id="avatar-row" class="flex items-center gap-2 flex-wrap"></div>
+<button id="shuffle-btn" class="w-9 h-9 rounded-full bg-white border border-slate-200/70 shadow-sm flex items-center justify-center text-blue-500 text-xs tactile-press shrink-0" aria-label="Naye icons lao">
+<i class="fa-solid fa-arrows-rotate"></i>
+</button>
+</div>
+</section>
+
+<!-- Coins Card -->
+<section class="mx-4 mt-4 bg-white rounded-[26px] p-4 shadow-clay-card border border-white/80">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 shadow-sm flex items-center justify-center">
+<i class="fa-solid fa-coins text-amber-950"></i>
+</div>
+<div>
+<h2 class="text-sm font-black text-slate-900 tracking-tight">Coins</h2>
+<p class="text-[11px] font-bold text-slate-400 mt-0.5">Tera balance</p>
+</div>
+</div>
+<span id="settings-coins" class="text-xl font-black text-amber-600 tracking-tight">0</span>
+</div>
+<div class="mt-3 bg-amber-50 border border-amber-200/70 rounded-2xl p-3 text-[11px] font-bold text-amber-800 leading-relaxed">
+🎮 <b>Snake coins kaise kamaayein?</b><br/>
+Snake khelein — game over hone pe <b>score × 2 coins</b> milte hain. Har khel pe games count bhi badhta hai. Best score = profile ka high score!
+</div>
+</section>
+
+<!-- Offline Info Card -->
+<section class="mx-4 mt-4 bg-white rounded-[26px] p-4 shadow-clay-card border border-white/80">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center">
+<i class="fa-solid fa-wifi text-emerald-600"></i>
+</div>
+<div class="flex-1 min-w-0">
+<h2 class="text-sm font-black text-slate-900 tracking-tight">Offline Support</h2>
+<p class="text-[11px] font-bold text-slate-400 mt-0.5 leading-relaxed">Ek baar install karne ke baad games internet ke bina bhi chalenge. 📴</p>
+</div>
+</div>
+</section>
+
+<!-- Danger Zone -->
+<section class="mx-4 mt-4 bg-white rounded-[26px] p-4 shadow-clay-card border border-white/80">
+<h2 class="text-sm font-black text-rose-600 tracking-tight">Danger Zone</h2>
+<button id="reset-btn" class="mt-2 w-full py-2.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 font-black text-xs tactile-press">
+        🗑️ Progress Reset karo (Best Score + Stats)
+      </button>
+</section>
+
+<!-- About -->
+<p class="text-center text-[11px] font-bold text-slate-400 mt-5">
+      GameHub v1.0 · Made with 💙 in India
+</p>
+</main>
+
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white/95 backdrop-blur-md pt-3 px-8 border-t border-slate-100 shadow-nav-bar flex items-center justify-between rounded-t-[32px] z-50" style="padding-bottom: max(1.75rem, env(safe-area-inset-bottom));">
+<a href="/" class="flex flex-col items-center tactile-press">
+<div class="w-10 h-7 flex items-center justify-center text-slate-400 text-xl">
+<i class="fa-solid fa-house"></i>
+</div>
+<span class="text-[11px] font-bold text-slate-400 tracking-tight">Home</span>
+</a>
+<a href="/profile.html" class="flex flex-col items-center tactile-press">
+<div class="w-10 h-7 flex items-center justify-center text-slate-400 text-xl">
+<i class="fa-solid fa-user"></i>
+</div>
+<span class="text-[11px] font-bold text-slate-400 tracking-tight">Profile</span>
+</a>
+<a href="/settings.html" class="flex flex-col items-center tactile-press">
+<div class="w-10 h-7 flex items-center justify-center text-blue-600 text-xl">
+<i class="fa-solid fa-gear"></i>
+</div>
+<span class="text-[11px] font-extrabold text-blue-600 tracking-tight">Settings</span>
+</a>
+</nav>
+
+<div id="toast"></div>
+</div>
+
+<script>
+    // ---------- helpers ----------
+    const toastEl = document.getElementById('toast');
+    let toastTimer;
+    function toast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+    }
+
+    const AVATAR_POOL = ['😎','🤖','👾','🐼','🦊','🐸','🐯','🦁','🦄','🐨','🐷','🐵','🐰','🐻','🐶','🦖','🐙','🐝','🐺','🐴'];
+    const avatarRow = document.getElementById('avatar-row');
+    const settingsAvatar = document.getElementById('settings-avatar');
+
+    function getAvatar() { return localStorage.getItem('player_avatar') || '😎'; }
+    function getName() { return localStorage.getItem('player_name') || 'Gamer'; }
+
+    // ---------- render 5 random avatars ----------
+    function renderAvatars() {
+      const shuffled = [...AVATAR_POOL].sort(() => Math.random() - 0.5);
+      const picks = shuffled.slice(0, 5);
+      const current = getAvatar();
+      avatarRow.innerHTML = picks.map(e =>
+        `<button class="avatar-chip ${e === current ? 'selected' : ''}" data-avatar="${e}">${e}</button>`
+      ).join('');
+    }
+    renderAvatars();
+
+    document.getElementById('shuffle-btn').addEventListener('click', renderAvatars);
+
+    avatarRow.addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-avatar]');
+      if (!chip) return;
+      const emoji = chip.dataset.avatar;
+      localStorage.setItem('player_avatar', emoji);
+      settingsAvatar.textContent = emoji;
+      avatarRow.querySelectorAll('.avatar-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      toast('Avatar set ho gaya! ' + emoji);
+    });
+
+    // ---------- name ----------
+    const nameInput = document.getElementById('name-input');
+    nameInput.value = getName() === 'Gamer' ? '' : getName();
+    nameInput.placeholder = getName();
+    document.getElementById('save-name').addEventListener('click', () => {
+      const next = nameInput.value.trim();
+      if (next.length < 2) { toast('Naam kam se kam 2 letters ka rakho 😅'); return; }
+      localStorage.setItem('player_name', next);
+      toast('Naam save ho gaya, ' + next + '! 🎉');
+    });
+
+    // ---------- coins ----------
+    document.getElementById('settings-coins').textContent =
+      parseInt(localStorage.getItem('coins') || '1500', 10).toLocaleString('en-IN');
+
+    // ---------- reset ----------
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      if (!confirm('Pakka reset? Best Score, games played aur streak chali jayegi!')) return;
+      localStorage.removeItem('best_score');
+      localStorage.removeItem('games_played');
+      localStorage.removeItem('streak');
+      toast('Sab progress reset ho gaya 🧹');
+    });
+
+    // ---------- service worker ----------
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body></html>

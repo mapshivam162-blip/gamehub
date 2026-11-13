@@ -1,83 +1,144 @@
 <!DOCTYPE html>
-<html lang="hi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0a0b1e" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <title>Snake 🐍 — GameHub</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <div class="root">
-      <div class="hud">
-        <a class="back" href="/">🏠 Portal</a>
-        <div class="scores">
-          <h1 id="score"></h1>
-          <h1 id="best-score"></h1>
-        </div>
-        <button id="pauseBtn" type="button">⏸ Pause</button>
-      </div>
-      <canvas id="board" width="600" height="600"></canvas>
-      <p class="hint">Swipe = move · ⏸ = pause · Keyboard bhi chalega (arrows / WASD)</p>
-    </div>
-    <div id="overlay" class="visible">
-      <div class="overlay__container">
-        <h1 id="overlay__head">Snake Game</h1>
-        <div class="overlayGrid">
-          <div>Best Score:</div>
-          <div id="leader__score">0</div>
-          <div class="option">Theme:</div>
-          <div><select id="theme"></select></div>
-          <div class="option">Difficulty:</div>
-          <div><select id="difficulty"></select></div>
-          <div class="option">Sounds:</div>
-          <div class="soundToggleWrapper">
-            <input type="checkbox" id="audio" />
-            <label for="audio"></label>
-          </div>
-        </div>
-        <button id="toggleButton">Start Game</button>
-        <button id="ObjectiveButton">Objective</button>
-        <button id="ControlButton">Controls</button>
-      </div>
-      <div id="overlay_control" class="visible_control">
-        <div class="overlay__container">
-          <h1 id="overlay__head">Controls</h1>
-          <div class="overlayGrid_">
-            <ul>
-              <li>
-                <p>📱 <b>Swipe</b> on the board to move the Snake.</p>
-              </li>
-              <li>
-                <p>⏸ Tap <b>Pause</b> to pause and return to Main Menu.</p>
-              </li>
-              <li>
-                <p>⌨️ Arrow keys / <b>WASD</b> bhi kaam karte hain.</p>
-              </li>
-            </ul>
-          </div>
-          <button id="MainButton1">Let's Begin</button>
-        </div>
-      </div>
-      <div id="overlay_objective" class="visible_objective">
-        <div class="overlay__container">
-          <h1 id="overlay__head">Objective</h1>
-          <div class="overlayGrid_">
-            <ul>
-              <li>Feed the Hungry Snake by moving it across the field.</li>
-              <li>Snake will pass the boundary and will enter from opposite side.</li>
-              <li>You will lose the Game if the Snake eats itself.</li>
-            </ul>
-          </div>
-          <button id="MainButton2">Let's Begin</button>
-        </div>
-      </div>
-    </div>
-    <div class="modal">
-      <h1 class="modal-text">Game Over! Tap or press any key 🔁</h1>
-    </div>
-  </body>
-  <script type="module" src="./js/index.js"></script>
-</html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<title>Snake 🐍 — GameHub</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="stylesheet" href="./styles.css"/>
+</head>
+<body class="bg-[#0e1633] min-h-screen relative overflow-x-hidden font-toy flex flex-col items-center select-none" style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom));">
+<!-- Ambient glow spots -->
+<div class="fixed top-12 left-1/2 -translate-x-1/2 w-[380px] h-[380px] bg-[#00e5ff]/10 rounded-full blur-[90px] pointer-events-none"></div>
+<div class="fixed bottom-20 left-1/2 -translate-x-1/2 w-[340px] h-[340px] bg-[#a855f7]/15 rounded-full blur-[80px] pointer-events-none"></div>
+<!-- Top App Bar -->
+<header class="w-full bg-[#f7f9fe]/95 shadow-md rounded-b-2xl relative z-10">
+<div class="flex justify-between items-center w-full px-4 max-w-lg mx-auto py-2">
+<a href="/" class="w-10 h-10 rounded-full bg-[#eceef3] flex items-center justify-center text-[#0056c5] active:scale-95 transition-all">
+<span class="text-lg">←</span>
+</a>
+<h1 class="text-[18px] font-black text-[#0056c5]">GameHub Snake</h1>
+<div class="w-10 h-10"></div>
+</div>
+</header>
+<!-- Main Cabinet -->
+<main class="w-full max-w-[420px] px-3 pt-7 pb-2 relative flex flex-col items-center">
+<div class="w-full bg-[#fff2e2] rounded-[38px] border-[8px] border-[#0084ff] game-cabinet-shadow relative pt-6 pb-5 px-3.5 flex flex-col items-center">
+<!-- Floating SNAKE badge -->
+<div class="absolute -top-7 left-1/2 -translate-x-1/2 z-20">
+<div class="bg-gradient-to-b from-[#38d6ff] to-[#0084ff] border-[3.5px] border-white px-7 py-1 rounded-full shadow-[0_5px_0_#0054ab] flex items-center gap-1.5">
+<span class="text-xl">🐍</span>
+<span class="text-white text-[20px] font-black tracking-wide stroke-blue-bubble leading-none">SNAKE</span>
+</div>
+</div>
+<!-- Close bubble -->
+<button onclick="location.href='/'" aria-label="Exit game" class="absolute -top-4 -right-3 z-30 w-11 h-11 bg-gradient-to-b from-[#ff5e5e] to-[#d61b1b] border-[3px] border-white rounded-full flex items-center justify-center text-white btn-3d-red">
+<span class="text-xl leading-none">✕</span>
+</button>
+<!-- HUD row -->
+<div class="w-full flex items-center justify-between gap-1.5 mt-2 mb-3">
+<a href="/" class="w-9 h-9 rounded-full bg-gradient-to-b from-[#38d6ff] to-[#0084ff] border-2 border-white text-white flex items-center justify-center btn-3d-blue shrink-0">
+<span class="text-sm">🏠</span>
+</a>
+<div class="flex items-center gap-1.5 min-w-0">
+<div class="bg-[#f8e5d0] border-2 border-white rounded-xl px-2 py-1 inner-cream-card-shadow flex items-center gap-1 min-w-0">
+<span class="text-xs shrink-0">🍎</span>
+<h1 id="score" class="font-bold text-[11px] text-[#82542a] truncate">Score: 0</h1>
+</div>
+<div class="bg-[#f8e5d0] border-2 border-white rounded-xl px-2 py-1 inner-cream-card-shadow flex items-center gap-1 min-w-0">
+<span class="text-xs shrink-0">🏆</span>
+<h1 id="best-score" class="font-bold text-[11px] text-[#82542a] truncate">Best: 0</h1>
+</div>
+</div>
+<button id="pauseBtn" class="bg-gradient-to-b from-[#38d6ff] to-[#0084ff] border-2 border-white rounded-full px-2.5 py-1 text-white font-bold text-xs flex items-center gap-1 btn-3d-blue shrink-0">
+<span>⏸</span>
+<span class="hidden sm:inline">Pause</span>
+</button>
+</div>
+<!-- Game board frame -->
+<div class="w-full relative aspect-square rounded-[24px] border-[6px] border-[#0084ff] game-board-bevel overflow-hidden checker-grid">
+<canvas id="board" width="600" height="600" class="absolute inset-0 w-full h-full"></canvas>
+<!-- Start menu overlay -->
+<div id="overlay" class="visible absolute inset-0 z-20 items-center justify-center bg-[#0e1633]/60 p-3">
+<div class="w-full max-w-[300px] bg-[#faebd7] rounded-[24px] border-[3.5px] border-white modal-cream-shadow p-3.5 flex flex-col items-center">
+<div class="flex items-center gap-1.5 mb-2">
+<span class="text-xl">🐍</span>
+<h2 class="text-[18px] font-black text-[#5a3615]">Snake Game</h2>
+</div>
+<div class="w-full flex flex-col gap-1.5 mb-3">
+<div class="w-full bg-[#f1dbc3] border border-white rounded-xl px-3 py-1 flex items-center justify-between text-xs inner-cream-card-shadow">
+<span class="text-[#7d5028] font-bold">Best Score</span>
+<span class="font-extrabold text-[#3a1d06]" id="leader__score">0</span>
+</div>
+<div class="w-full bg-[#f1dbc3] border border-white rounded-xl px-3 py-1 flex items-center justify-between text-xs inner-cream-card-shadow">
+<span class="text-[#7d5028] font-bold">Theme</span>
+<div class="option"><select id="theme"></select></div>
+</div>
+<div class="w-full bg-[#f1dbc3] border border-white rounded-xl px-3 py-1 flex items-center justify-between text-xs inner-cream-card-shadow">
+<span class="text-[#7d5028] font-bold">Difficulty</span>
+<div class="option"><select id="difficulty"></select></div>
+</div>
+<div class="w-full bg-[#f1dbc3] border border-white rounded-xl px-3 py-1 flex items-center justify-between text-xs inner-cream-card-shadow">
+<span class="text-[#7d5028] font-bold">Sounds</span>
+<div class="soundToggleWrapper">
+<input type="checkbox" id="audio"/>
+<label for="audio"></label>
+</div>
+</div>
+</div>
+<button id="toggleButton" class="w-full py-2 bg-gradient-to-b from-[#38d6ff] to-[#0084ff] border-[2.5px] border-white rounded-full text-white text-[14px] font-black tracking-wide stroke-blue-bubble btn-3d-blue flex items-center justify-center gap-1 mb-2.5">
+<span>▶</span>
+<span>Start Game</span>
+</button>
+<div class="w-full flex items-center justify-center gap-2">
+<button id="ObjectiveButton" class="bg-[#dcfce7] text-[#166534] border border-[#bbf7d0] px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 active:scale-95 transition-transform">
+<span>🎯</span> Objective
+</button>
+<button id="ControlButton" class="bg-[#ffedd5] text-[#9a3412] border border-[#fed7aa] px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 active:scale-95 transition-transform">
+<span>🎮</span> Controls
+</button>
+</div>
+</div>
+</div>
+<!-- Controls overlay -->
+<div id="overlay_control" class="absolute inset-0 z-20 items-center justify-center bg-[#0e1633]/60 p-3">
+<div class="w-full max-w-[300px] bg-[#faebd7] rounded-[24px] border-[3.5px] border-white modal-cream-shadow p-3.5 flex flex-col items-center">
+<h2 class="text-[18px] font-black text-[#5a3615] mb-2">🎮 Controls</h2>
+<ul class="w-full flex flex-col gap-1.5 text-[11px] text-[#7d5028] font-bold mb-3">
+<li class="bg-[#f1dbc3] border border-white rounded-xl px-3 py-1.5 inner-cream-card-shadow">👆 Board pe <b>swipe</b> karo — snake usi direction me jayega</li>
+<li class="bg-[#f1dbc3] border border-white rounded-xl px-3 py-1.5 inner-cream-card-shadow">⏸ <b>Pause button</b> upar hai, jab mann kare ruk jao</li>
+<li class="bg-[#f1dbc3] border border-white rounded-xl px-3 py-1.5 inner-cream-card-shadow">⌨️ Keyboard: <b>Arrow keys / WASD</b>, Esc = pause</li>
+</ul>
+<button id="MainButton1" class="w-full py-2 bg-gradient-to-b from-[#38d6ff] to-[#0084ff] border-[2.5px] border-white rounded-full text-white text-[14px] font-black stroke-blue-bubble btn-3d-blue">Let's Begin</button>
+</div>
+</div>
+<!-- Objective overlay -->
+<div id="overlay_objective" class="absolute inset-0 z-20 items-center justify-center bg-[#0e1633]/60 p-3">
+<div class="w-full max-w-[300px] bg-[#faebd7] rounded-[24px] border-[3.5px] border-white modal-cream-shadow p-3.5 flex flex-col items-center">
+<h2 class="text-[18px] font-black text-[#5a3615] mb-2">🎯 Objective</h2>
+<ul class="w-full flex flex-col gap-1.5 text-[11px] text-[#7d5028] font-bold mb-3">
+<li class="bg-[#f1dbc3] border border-white rounded-xl px-3 py-1.5 inner-cream-card-shadow">🍎 Snake ko khana khilao, board me ghumao</li>
+<li class="bg-[#f1dbc3] border border-white rounded-xl px-3 py-1.5 inner-cream-card-shadow">🔄 Border cross karo toh dusri side se wapas aayega</li>
+<li class="bg-[#f1dbc3] border border-white rounded-xl px-3 py-1.5 inner-cream-card-shadow">⚠️ Apni tail se takraye toh game over!</li>
+</ul>
+<button id="MainButton2" class="w-full py-2 bg-gradient-to-b from-[#38d6ff] to-[#0084ff] border-[2.5px] border-white rounded-full text-white text-[14px] font-black stroke-blue-bubble btn-3d-blue">Let's Begin</button>
+</div>
+</div>
+</div>
+<!-- Hint pill -->
+<div class="mt-3 bg-[#f5dfc6] border border-white rounded-full px-3.5 py-1 text-[11px] text-[#77471d] font-bold shadow-sm text-center">
+👆 Board pe <b>swipe</b> karo — snake usi direction me jayega! 🍎 khao, lamba bano
+</div>
+</div>
+</main>
+<!-- Game over modal -->
+<div class="modal">
+<h1 class="modal-text">Game Over! Tap or press any key 🔁</h1>
+</div>
+<script type="module" src="./js/index.js"></script>
+</body></html>

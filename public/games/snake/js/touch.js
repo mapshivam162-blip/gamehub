@@ -36,6 +36,35 @@ export function initTouch(board) {
     pauseBtn.addEventListener("click", () => togglePause(board));
   }
 
+  // ---------- Coins earn (game over pe score × 2) ----------
+  const modalEl = document.querySelector(".modal");
+  let awarded = false;
+  if (modalEl) {
+    new MutationObserver(() => {
+      const shown = modalEl.style.display !== "none" && modalEl.style.display !== "";
+      if (shown && !awarded) {
+        awarded = true;
+        const coins = parseInt(localStorage.getItem("coins") || "1500", 10);
+        const earned = Math.max(1, board.score * 2);
+        localStorage.setItem("coins", String(coins + earned));
+        localStorage.setItem("games_played", String(
+          parseInt(localStorage.getItem("games_played") || "0", 10) + 1
+        ));
+        const msg = modalEl.querySelector(".modal-text");
+        if (msg) {
+          msg.insertAdjacentHTML(
+            "afterend",
+            `<p style="margin-top:8px;font-size:0.95rem;font-weight:800;color:#b45309">🪙 +${earned} coins kamaye!</p>`
+          );
+        }
+      } else if (!shown) {
+        awarded = false;
+        const coinNote = modalEl.querySelector("p[style]");
+        if (coinNote) coinNote.remove();
+      }
+    }).observe(modalEl, { attributes: true, attributeFilter: ["style"] });
+  }
+
   // ---------- Tap to restart (game over) ----------
   const modal = document.querySelector(".modal");
   modal?.addEventListener("click", () => {

@@ -66,18 +66,44 @@
       box-shadow: 0 2.5px 0 #0054ab, inset 0 1.5px 1.5px rgba(255,255,255,0.7);
       border: 2px solid #ffffff;
     }
+    .avatar-chip {
+      width: 2.6rem; height: 2.6rem;
+      border-radius: 999px;
+      background: #fff6ec;
+      border: 2.5px solid #fff;
+      box-shadow: 0 2.5px 0 #e4c4a6, inset 0 1.5px 1.5px rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+    .avatar-chip.selected {
+      border-color: #0084ff;
+      transform: scale(1.12);
+      background: #e3f2ff;
+    }
+    .avatar-chip:active { transform: scale(0.9); }
 
     body {
       background:
         radial-gradient(circle at 20% 10%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
         radial-gradient(circle at 80% 90%, rgba(168, 85, 247, 0.15) 0%, transparent 40%),
         #121c42;
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     .fade-pop { animation: fadePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
     @keyframes fadePop {
       from { opacity: 0; transform: scale(0.92); }
       to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* Chhoti screens: text overlap na ho */
+    @media (max-width: 360px) {
+      .stat-card { min-height: 96px; }
+      .stat-card span:first-of-type { font-size: 9px !important; }
+      .text-stroke-title { -webkit-text-stroke-width: 3px; }
+      .game-modal-frame { padding-left: 0.75rem; padding-right: 0.75rem; }
     }
   </style>
 </head>
@@ -108,7 +134,7 @@
 <div class="flex items-center gap-3">
 <div class="relative">
 <div class="avatar-ring w-16 h-16 rounded-full overflow-hidden bg-gradient-to-b from-[#ff8da1] to-[#ba3c69] flex items-center justify-center border-2 border-white shadow-inner flex-col">
-<span class="text-3xl">😎</span>
+<span id="profile-avatar" class="text-3xl">😎</span>
 </div>
 <!-- Edit Pencil Badge -->
 <button id="edit-name-btn" aria-label="Edit Profile Name" class="edit-pen-btn absolute -bottom-1 -right-1 w-6 h-6 rounded-lg flex items-center justify-center active:scale-90 transition-transform">
@@ -236,10 +262,35 @@
 </div>
 </section>
 <!-- END: StatsGridSection -->
+<!-- BEGIN: EditorSection (pencil button se khulta hai) -->
+<section id="profile-editor" class="hidden user-header-card rounded-2xl p-3.5 flex flex-col gap-3" data-purpose="profile-editor">
+<!-- Name -->
+<div>
+<label class="text-[#8c5e3c] text-[10px] font-black uppercase tracking-tight">Player Name</label>
+<div class="mt-1 flex items-center gap-1.5">
+<input id="editor-name" type="text" maxlength="16" minlength="2" placeholder="Naam likho" class="flex-1 min-w-0 bg-[#fff6ec] border-2 border-white rounded-xl px-3 py-1.5 text-xs font-bold text-[#3b2314] focus:outline-none focus:border-[#0084ff]" style="box-shadow: inset 0 2px 3px rgba(0,0,0,0.06);"/>
+<button id="save-name-btn" class="bg-gradient-to-b from-[#38d6ff] to-[#0084ff] border-2 border-white rounded-xl px-3 py-1.5 text-white text-[11px] font-black btn-3d-blue shrink-0">Save</button>
+</div>
+</div>
+<!-- Avatars -->
+<div>
+<label class="text-[#8c5e3c] text-[10px] font-black uppercase tracking-tight">Avatar — 5 random icons</label>
+<div class="mt-1.5 flex items-center justify-between gap-1">
+<div id="editor-avatars" class="flex items-center gap-1.5 flex-wrap"></div>
+<button id="shuffle-btn" aria-label="Naye icons lao" class="w-8 h-8 rounded-lg bg-[#fff6ec] border-2 border-white flex items-center justify-center text-sm shrink-0" style="box-shadow: 0 2.5px 0 #e4c4a6;">🔄</button>
+</div>
+</div>
+</section>
+<!-- END: EditorSection -->
 </div>
 <!-- END: ModalInnerContent -->
 </main>
 <script>
+    // ---- helpers ----
+    const AVATAR_POOL = ['😎','🤖','👾','🐼','🦊','🐸','🐯','🦁','🦄','🐨','🐷','🐵','🐰','🐻','🐶','🦖','🐙','🐝','🐺','🐴'];
+    const getAvatar = () => localStorage.getItem('player_avatar') || '😎';
+    const getName = () => localStorage.getItem('player_name') || 'Player123456';
+
     // ---- Working profile data (localStorage se) ----
     const best = parseInt(localStorage.getItem('best_score') || '0', 10);
     const played = parseInt(localStorage.getItem('games_played') || '0', 10);
@@ -247,9 +298,9 @@
     const xp = best + played * 10;
     const league = best >= 50 ? 'Gold' : best >= 20 ? 'Silver' : 'Bronze';
     const level = 1 + Math.floor(xp / 100);
-    const name = localStorage.getItem('player_name') || 'Player123456';
 
-    document.getElementById('profile-name').textContent = name;
+    document.getElementById('profile-name').textContent = getName();
+    document.getElementById('profile-avatar').textContent = getAvatar();
     document.getElementById('profile-level').textContent = level;
     document.getElementById('st-highscore').textContent = best;
     document.getElementById('st-played').textContent = played;
@@ -258,13 +309,47 @@
     document.getElementById('st-league').textContent = league;
     document.getElementById('st-xp').textContent = xp;
 
-    // ---- Edit name ----
+    // ---- Editor section (pencil button se toggle) ----
+    const editor = document.getElementById('profile-editor');
+    const editorName = document.getElementById('editor-name');
+    const avatarRow = document.getElementById('editor-avatars');
+
+    editorName.value = getName() === 'Player123456' ? '' : getName();
+    editorName.placeholder = getName();
+
+    function renderAvatars() {
+      const shuffled = [...AVATAR_POOL].sort(() => Math.random() - 0.5);
+      const picks = shuffled.slice(0, 5);
+      const current = getAvatar();
+      avatarRow.innerHTML = picks.map(e =>
+        `<button class="avatar-chip ${e === current ? 'selected' : ''}" data-avatar="${e}">${e}</button>`
+      ).join('');
+    }
+    renderAvatars();
+
+    document.getElementById('shuffle-btn').addEventListener('click', renderAvatars);
+
+    avatarRow.addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-avatar]');
+      if (!chip) return;
+      const emoji = chip.dataset.avatar;
+      localStorage.setItem('player_avatar', emoji);
+      document.getElementById('profile-avatar').textContent = emoji;
+      avatarRow.querySelectorAll('.avatar-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+
+    document.getElementById('save-name-btn').addEventListener('click', () => {
+      const next = editorName.value.trim();
+      if (next.length < 2) { alert('Naam kam se kam 2 letters ka rakho 😅'); return; }
+      localStorage.setItem('player_name', next);
+      document.getElementById('profile-name').textContent = next;
+    });
+
+    // ---- Edit pencil button: editor kholo / band karo ----
     document.getElementById('edit-name-btn').addEventListener('click', () => {
-      const next = prompt('Naya naam daalo (2-16 characters):', name);
-      if (next && next.trim().length >= 2 && next.trim().length <= 16) {
-        localStorage.setItem('player_name', next.trim());
-        document.getElementById('profile-name').textContent = next.trim();
-      }
+      editor.classList.toggle('hidden');
+      if (!editor.classList.contains('hidden')) editorName.focus();
     });
   </script>
 </body></html>
