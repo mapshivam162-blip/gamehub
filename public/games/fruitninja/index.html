@@ -1,71 +1,53 @@
 <!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-	<meta name="theme-color" content="#87CEEB">
-	<title>Fruit Ninja 🍉 — GameHub</title>
-	<link rel="icon" type="image/svg+xml" href="../../icon.svg">
-	<link rel="stylesheet" href="app.css">
-	<style>
-		#back-btn {
-			position: fixed;
-			top: max(10px, env(safe-area-inset-top));
-			left: 12px;
-			z-index: 999;
-			width: 40px; height: 40px;
-			border-radius: 999px;
-			background: rgba(255,255,255,0.92);
-			border: 2px solid #2e7d32;
-			box-shadow: 0 3px 0 #1b5e20;
-			font-size: 18px; line-height: 1;
-			cursor: pointer;
-			display: flex; align-items: center; justify-content: center;
-			text-decoration: none; color: #2e7d32;
-			-webkit-tap-highlight-color: transparent;
-		}
-		#back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #1b5e20; }
-	</style>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Fruit Ninja 🍉 — GameHub</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-	<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
 
-	<div id="container">
-		<div id="score">
-			Score: <span id="scorevalue"></span>
-		</div>
+<div class="wrap">
+  <div class="cabinet">
+    <div class="badge">🍉 FRUIT NINJA</div>
+    <div class="hud">
+      <div class="hud-card">
+        <span class="hud-label">SCORE</span>
+        <span class="hud-val" id="score">0</span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">BEST</span>
+        <span class="hud-val" id="best">0</span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">LIVES</span>
+        <span class="hud-val" id="lives">❤️❤️❤️</span>
+      </div>
+    </div>
 
-		<div id="heartsLeft">
-			
-		</div>
+    <div class="game-area">
+      <canvas id="board" width="320" height="480"></canvas>
+    </div>
 
-		
-		<div id="fruitContainer">
-			<img id="fruit1" class="fruit">
-		</div>
-		
-		<div class="instructions">
-			<p id="info">Cut up some fruit!</p>
-		</div>
+    <div id="combo" class="combo"></div>
 
-		<div id="startReset">
-			Start Game!
-		</div>
+    <div id="overlay" class="overlay">
+      <div class="overlay-card">
+        <div class="overlay-icon" id="ov-icon">🍉</div>
+        <h2 id="ov-title">Fruit Ninja</h2>
+        <p id="ov-sub">Swipe karke fruits slice karo! Bombs se bache.</p>
+        <button id="start-btn" class="start-btn">▶ Start Game</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-		<div id="gameOver">
-
-		</div>
-
-		<audio id="sliceSound">
-			<source src="audio/slicefruit.mp3"></source>
-			<source src="audio/slicefruit.ogg"></source>
-		</audio>
-
-	</div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-<script type="text/javascript" src="app.js"></script>
-
-</body>
-</html>
+<script src="script.js"></script>
+</body></html>
