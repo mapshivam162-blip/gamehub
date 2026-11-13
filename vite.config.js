@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   appType: 'mpa', // alag-alag static game pages, koi SPA fallback nahi
+  base: './', // GitHub Pages ke liye relative paths
   server: {
     host: true, // phone + LAN devices se access ke liye
     port: 5173,

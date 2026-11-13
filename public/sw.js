@@ -4,7 +4,7 @@
    - CDN (Tailwind/fonts/icons/images): cache-first (fast) + background update */
 
 const CACHE = 'gamehub-v4';
-const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg', '/icon-maskable.svg'];
+const SHELL = ['index.html', './', 'manifest.webmanifest', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -39,7 +39,7 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       fetch(e.request)
         .then(saveToCache)
-        .catch(() => caches.match(e.request).then((c) => c || caches.match('/index.html')))
+        .catch(() => caches.match(e.request).then((c) => c || caches.match('index.html')))
     );
   } else {
     // CDN: cache-first + background refresh

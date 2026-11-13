@@ -61,7 +61,7 @@ function renderGames() {
   grid.innerHTML = list
     .map((g, i) => {
       const isReady = g.status === 'ready';
-      const href = `/games/${g.id}/index.html`;
+      const href = `games/${g.id}/index.html`;
       const heat = Array.from({ length: 3 }, (_, k) =>
         k < g.heat ? '🔥' : '<span class="text-slate-300">🔥</span>'
       ).join(' ');
@@ -172,7 +172,7 @@ installBtn.addEventListener('click', async () => {
 // ---------- Service worker (offline support) ----------
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
       /* dev me fail ho sakta hai, theek hai */
     });
   });
