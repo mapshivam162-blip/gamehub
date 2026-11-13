@@ -4,42 +4,83 @@
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    border: 1px solid #000;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    border: 4px solid #0084ff;
+    border-radius: 8px;
+    box-shadow: 0 8px 0 #0054ab, 0 12px 24px rgba(0,0,0,0.4);
     position: relative;
-    min-height: 0; /* Prevents overflow */
+    min-height: 0;
+    overflow: hidden;
 }
 
-/* Add board coordinates */
-.chess-board::before,
-.chess-board::after,
-.square::before,
-.square::after {
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    min-height: 0;
+    min-width: 0;
+}
+
+.square:hover { filter: brightness(1.06); }
+
+.square.light { background-color: var(--light-square); }
+.square.dark { background-color: var(--dark-square); }
+
+.square.selected {
+    background-color: var(--selected-square);
+    box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.7);
+}
+
+.square.possible-move::after {
+    content: '';
+    position: absolute;
+    width: 28%;
+    height: 28%;
+    background-color: var(--possible-move-square);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.square.possible-move:has(.piece)::after {
+    width: 78%;
+    height: 78%;
+    background-color: transparent;
+    border: 4px solid var(--possible-move-square);
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.square.in-check {
+    background-color: var(--check-square);
+    animation: check-pulse 1.5s ease infinite alternate;
+}
+
+@keyframes check-pulse {
+    from { box-shadow: inset 0 0 8px rgba(255, 0, 0, 0.3); }
+    to { box-shadow: inset 0 0 16px rgba(255, 0, 0, 0.6); }
+}
+
+.square.last-move-from,
+.square.last-move-to {
+    background-color: rgba(100, 150, 220, 0.4);
+}
+
+/* Coordinates */
+.square::before, .square::after {
     position: absolute;
     color: rgba(0, 0, 0, 0.5);
-    font-size: 0.7rem;
-    font-weight: normal;
+    font-size: 0.65rem;
+    font-weight: 700;
     z-index: 2;
     pointer-events: none;
-    padding: 0 2px;
-    border-radius: 2px;
-    background-color: rgba(255, 255, 255, 0.3);
-    line-height: 1;
     display: var(--show-coords, none);
 }
-
-/* Adjust color specifically for dark squares */
-.square.dark::before,
-.square.dark::after {
-    color: rgba(255, 255, 255, 0.6);
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-/* File coordinates (a-h) - Positioned slightly inside */
-.square::before {
-    bottom: 2px;
-    left: 2px;
-}
+.square.dark::before, .square.dark::after { color: rgba(255, 255, 255, 0.6); }
+.square::before { bottom: 2px; left: 3px; }
+.square::after { top: 2px; right: 3px; }
 .square[data-col="0"]::before { content: 'a'; }
 .square[data-col="1"]::before { content: 'b'; }
 .square[data-col="2"]::before { content: 'c'; }
@@ -48,12 +89,6 @@
 .square[data-col="5"]::before { content: 'f'; }
 .square[data-col="6"]::before { content: 'g'; }
 .square[data-col="7"]::before { content: 'h'; }
-
-/* Rank coordinates (1-8) - Positioned slightly inside */
-.square::after {
-    top: 2px;
-    right: 2px;
-}
 .square[data-row="7"]::after { content: '1'; }
 .square[data-row="6"]::after { content: '2'; }
 .square[data-row="5"]::after { content: '3'; }
@@ -62,128 +97,39 @@
 .square[data-row="2"]::after { content: '6'; }
 .square[data-row="1"]::after { content: '7'; }
 .square[data-row="0"]::after { content: '8'; }
-
-/* Hide file coordinate on a1 and rank coordinate on h8 for less clutter */
 .square[data-row="7"][data-col="0"]::before { display: none !important; }
 .square[data-row="0"][data-col="7"]::after { display: none !important; }
 
-.square {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.piece {
+    width: 88%;
+    height: 88%;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
     position: relative;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    min-height: 0; /* Ensures squares don't expand too much */
-    min-width: 0;
+    transition: transform 0.12s ease;
+    will-change: transform;
+    pointer-events: auto;
 }
 
-.square:focus {
-    outline: 2px solid var(--accent-color);
-    outline-offset: -2px;
-}
-
-.square:hover {
-    filter: brightness(1.08);
-}
-
-.square.light {
-    background-color: var(--light-square);
-    /* Subtle texture - reduced intensity */
-    background-image: linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
-    background-size: 4px 4px;
-}
-
-.square.dark {
-    background-color: var(--dark-square);
-    /* Subtle texture - reduced intensity */
-    background-image: linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
-    background-size: 4px 4px;
-}
-
-.square.selected {
-    background-color: var(--selected-square);
-    box-shadow: inset 0 0 15px rgba(255, 217, 0, 0.2);
-    z-index: 1;
-}
-
-.square.possible-move::after {
-    content: '';
-    position: absolute;
-    width: 25%;
-    height: 25%;
-    background-color: var(--possible-move-square);
-    border-radius: 50%;
+.piece.dragging {
+    cursor: grabbing;
+    opacity: 0.85;
+    z-index: 100;
     pointer-events: none;
-    animation: pulse 2s infinite;
-    display: var(--show-possible-moves);
+    position: fixed;
+    transition: none !important;
 }
 
-@keyframes pulse {
-    0% { transform: scale(0.95); opacity: 0.6; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-    100% { transform: scale(0.95); opacity: 0.6; }
+.piece:hover { transform: scale(1.08); }
+.piece:active { cursor: grabbing; transform: scale(1.12); }
+
+.piece.moved { animation: move-piece 0.25s ease; }
+
+@keyframes move-piece {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
 }
 
-.square.possible-move.light::after {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-}
-
-.square.possible-move.dark::after {
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-}
-
-/* Highlight for the king in check */
-.square.in-check {
-    background-color: var(--check-square);
-    animation: check-pulse 1.5s ease infinite alternate;
-}
-
-@keyframes check-pulse {
-    from { box-shadow: inset 0 0 5px rgba(255, 0, 0, 0.3); }
-    to { box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.5); }
-}
-
-/* Last move indication - using corner markers */
-.square.last-move-from::before,
-.square.last-move-to::before,
-.square.last-move-from::after,
-.square.last-move-to::after {
-    content: '';
-    position: absolute;
-    width: 12%;
-    height: 12%;
-    background-color: rgba(70, 130, 180, 0.5); /* Steel Blue - more transparent */
-    z-index: 1;
-    display: var(--show-last-move); /* Control visibility */
-}
-
-/* Top-left corner */
-.square.last-move-from::before {
-    top: 0;
-    left: 0;
-    border-bottom-right-radius: 5px;
-}
-
-/* Bottom-right corner */
-.square.last-move-from::after {
-    bottom: 0;
-    right: 0;
-    border-top-left-radius: 5px;
-}
-
-/* Top-right corner */
-.square.last-move-to::before {
-    top: 0;
-    right: 0;
-    border-bottom-left-radius: 5px;
-}
-
-/* Bottom-left corner */
-.square.last-move-to::after {
-    bottom: 0;
-    left: 0;
-    border-top-right-radius: 5px;
-} 
+.piece::before, .piece::after { content: none !important; display: none !important; }
