@@ -3,8 +3,20 @@ const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;
 
-const PLAYER_W = 30, PLAYER_H = 16;
+// Sprite sheet (classic Space Invaders sprites)
+const SPRITE = new Image();
+SPRITE.src = 'spritesheet.png';
+const PLAYER_CLIP = { x: 0, y: 204, w: 62, h: 32 };
+const ALIEN_CLIPS = {
+  bottom: [{ x: 0, y: 0, w: 51, h: 34 }, { x: 0, y: 102, w: 51, h: 34 }],
+  middle: [{ x: 0, y: 137, w: 50, h: 33 }, { x: 0, y: 170, w: 50, h: 34 }],
+  top:    [{ x: 0, y: 68, w: 50, h: 32 }, { x: 0, y: 34, w: 50, h: 32 }],
+};
+
+let alienFrame = 0;
+let alienFrameTimer = 0;
 const ALIEN_W = 24, ALIEN_H = 16;
+const PLAYER_W = 30, PLAYER_H = 16;
 const BULLET_W = 3, BULLET_H = 10;
 const SHIELD_W = 40, SHIELD_H = 20;
 
@@ -47,7 +59,8 @@ function buildAliens() {
         x: startX + c * (ALIEN_W + 8),
         y: 40 + r * (ALIEN_H + 8),
         w: ALIEN_W, h: ALIEN_H,
-        row: r, alive: true
+        row: r, alive: true,
+        type: r < 2 ? 'bottom' : (r < 4 ? 'middle' : 'top')
       });
     }
   }
@@ -177,7 +190,9 @@ function update() {
     if (a.alive && a.y + a.h >= player.y) { endGame(); return; }
   }
 
-  // all aliens cleared -> next level
+  // alien frame toggle
+  alienFrameTimer++;
+  if (alienFrameTimer > 20) { alienFrameTimer = 0; alienFrame = 1 - alienFrame; }
   if (aliens.every(a => !a.alive)) {
     level++;
     levelEl.textContent = level;
@@ -223,20 +238,37 @@ function draw() {
     ctx.strokeRect(s.x + 0.5, s.y + 0.5, s.w - 1, s.h - 1);
   }
   // aliens
-  for (const a of aliens) {
-    if (!a.alive) continue;
-    ctx.fillStyle = a.row < 1 ? '#e74c3c' : (a.row < 3 ? '#f39c12' : '#2ecc71');
-    ctx.fillRect(a.x, a.y, a.w, a.h);
-    // eyes
-    ctx.fillStyle = '#000';
-    ctx.fillRect(a.x + 5, a.y + 5, 4, 4);
-    ctx.fillRect(a.x + a.w - 9, a.y + 5, 4, 4);
+  if (SPRITE.complete && SPRITE.naturalWidth) {
+    for (const a of aliens) {
+      if (!a.alive) continue;
+      const clips = ALIEN_CLIPS[a.type];
+      const clip = clips[alienFrame];
+      const scale = a.type === 'bottom' ? 0.6 : 0.65;
+      const dw = clip.w * scale, dh = clip.h * scale;
+      ctx.drawImage(SPRITE, clip.x, clip.y, clip.w, clip.h, a.x + (a.w - dw)/2, a.y + (a.h - dh)/2, dw, dh);
+    }
+  } else {
+    for (const a of aliens) {
+      if (!a.alive) continue;
+      ctx.fillStyle = a.row < 1 ? '#e74c3c' : (a.row < 3 ? '#f39c12' : '#2ecc71');
+      ctx.fillRect(a.x, a.y, a.w, a.h);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(a.x + 5, a.y + 5, 4, 4);
+      ctx.fillRect(a.x + a.w - 9, a.y + 5, 4, 4);
+    }
   }
   // player
-  ctx.fillStyle = '#0084ff';
-  ctx.fillRect(player.x, player.y, PLAYER_W, PLAYER_H);
-  ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillRect(player.x + 2, player.y + 2, PLAYER_W - 4, 3);
+  if (SPRITE.complete && SPRITE.naturalWidth) {
+    const pc = PLAYER_CLIP;
+    const scale = 0.5;
+    const dw = pc.w * scale, dh = pc.h * scale;
+    ctx.drawImage(SPRITE, pc.x, pc.y, pc.w, pc.h, player.x + (PLAYER_W - dw)/2, player.y + (PLAYER_H - dh)/2, dw, dh);
+  } else {
+    ctx.fillStyle = '#0084ff';
+    ctx.fillRect(player.x, player.y, PLAYER_W, PLAYER_H);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillRect(player.x + 2, player.y + 2, PLAYER_W - 4, 3);
+  }
   // bullets
   ctx.fillStyle = '#f1c40f';
   for (const b of bullets) ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H);
