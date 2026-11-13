@@ -23,11 +23,11 @@ export const games = [
     title: '2048',
     emoji: '🔢',
     desc: 'Tiles slide karo, merge karo, 2048 banao.',
-    status: 'soon',
+    status: 'ready',
     players: 1,
     grad: 'from-amber-400 to-orange-500',
     tile: '#3d2407',
-    heat: 2,
+    heat: 3,
   },
   {
     id: 'flappy',
