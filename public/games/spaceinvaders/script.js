@@ -1,4 +1,4 @@
-// Space Invaders — GameHub
+// Space Invaders — Khelog
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;
@@ -85,7 +85,7 @@ function startGame() {
   gameOver = false; won = false; started = true;
   shootCooldown = 0; moveDir = 0;
   ovIcon.textContent = '👾'; ovTitle.textContent = 'Space Invaders';
-  ovSub.textContent = 'Aliens ko shoot karo, shields bache!';
+  ovSub.textContent = 'Bas move karo — goli apne aap chalti hai! 🔫';
   startBtn.textContent = '▶ Start Game';
   overlay.style.display = 'none';
   if (rafId) cancelAnimationFrame(rafId);
@@ -107,6 +107,8 @@ function update() {
   if (player.x + PLAYER_W > W) player.x = W - PLAYER_W;
 
   if (shootCooldown > 0) shootCooldown--;
+  // AUTO-FIRE: cooldown khatam hote hi goli apne aap chal jati hai
+  if (shootCooldown <= 0) shoot();
 
   // bullets
   for (let i = bullets.length - 1; i >= 0; i--) {
@@ -284,9 +286,29 @@ function loop() {
 }
 
 // Input
-document.getElementById('btn-left').addEventListener('click', () => { moveDir = -1; setTimeout(() => moveDir = 0, 120); });
-document.getElementById('btn-right').addEventListener('click', () => { moveDir = 1; setTimeout(() => moveDir = 0, 120); });
-document.getElementById('btn-shoot').addEventListener('click', shoot);
+// Hold-to-move: dabaye rakho, chhodo to ruk jaye
+function bindMove(btn, dir) {
+  btn.addEventListener('pointerdown', (e) => { e.preventDefault(); moveDir = dir; });
+  btn.addEventListener('pointerup', () => { moveDir = 0; });
+  btn.addEventListener('pointercancel', () => { moveDir = 0; });
+  btn.addEventListener('pointerleave', () => { moveDir = 0; });
+  btn.addEventListener('touchstart', (e) => { e.preventDefault(); moveDir = dir; }, { passive: false });
+  btn.addEventListener('touchend', (e) => { e.preventDefault(); moveDir = 0; }, { passive: false });
+}
+bindMove(document.getElementById('btn-left'), -1);
+bindMove(document.getElementById('btn-right'), 1);
+// Canvas drag: finger slide karke player idhar-udhar
+const board = document.getElementById('board');
+board.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const r = board.getBoundingClientRect();
+  const scale = W / r.width;
+  player.x = (t.clientX - r.left) * scale - PLAYER_W / 2;
+  if (player.x < 0) player.x = 0;
+  if (player.x + PLAYER_W > W) player.x = W - PLAYER_W;
+}, { passive: false });
+board.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
 
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();

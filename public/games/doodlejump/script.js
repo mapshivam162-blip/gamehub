@@ -1,4 +1,4 @@
-// Doodle Jump — GameHub (3D look)
+// Doodle Jump — Khelog (3D look)
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;

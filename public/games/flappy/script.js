@@ -1,4 +1,4 @@
-// Flappy Bird — GameHub (9:16 portrait, difficulty levels)
+// Flappy Bird — Khelog (9:16 portrait, difficulty levels)
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;

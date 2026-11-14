@@ -1,4 +1,4 @@
-// Snake polish — GameHub
+// Snake polish — Khelog
 // Classes (js/classes/*) ko touch kiye bina visuals upgrade:
 // - glossy apple food (radial gradient + shine + stem + leaf)
 // - snake body rounded + gradient, head with eyes

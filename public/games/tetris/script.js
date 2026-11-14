@@ -1,4 +1,4 @@
-// Tetris — GameHub
+// Tetris — Khelog
 const COLS = 10, ROWS = 20, CELL = 20;
 const COLORS = {
   I: '#00f0f0', O: '#f0f000', T: '#a000f0', S: '#00f000',
@@ -262,7 +262,7 @@ function drawMini(ctx, piece, ox, oy, size) {
 function endGame() {
   gameOver = true;
   if (score > best) { best = score; localStorage.setItem('best_score', String(best)); bestEl.textContent = best; }
-  // GameHub rewards
+  // Khelog rewards
   try {
     const c = parseInt(localStorage.getItem('coins') || '1500', 10) + Math.floor(score / 10);
     localStorage.setItem('coins', String(c));

@@ -92,7 +92,7 @@ GameManager.prototype.actuate = function () {
     this.storageManager.setGameState(this.serialize());
   }
 
-  // GameHub rewards
+  // Khelog rewards
   if (!this._ghAwarded && this.isGameTerminated()) {
     this._ghAwarded = true;
     try {

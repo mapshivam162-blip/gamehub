@@ -1,4 +1,4 @@
-/* GameHub service worker — offline support
+/* Khelog service worker — offline support
    Strategy:
    - Apne pages/JS/CSS: network-first (naya content turant), offline pe cache
    - CDN (Tailwind/fonts/icons/images): cache-first (fast) + background update */

@@ -1,4 +1,4 @@
-// Minesweeper — GameHub
+// Minesweeper — Khelog
 const ROWS = 9, COLS = 9, MINES = 10;
 let grid = []; // { mine, revealed, flagged, count }
 let gameOver = false, started = false, firstClick = true;

@@ -1,4 +1,4 @@
-// Tic-Tac-Toe — GameHub (modern casual 3D style)
+// Tic-Tac-Toe — Khelog (modern casual 3D style)
 // Supports 1 Player (vs CPU: Easy/Medium/Hard) and 2 Player (same device)
 
 const WIN_PATTERNS = [
@@ -232,7 +232,7 @@ function endGame(result) {
     modalSub.textContent = mode === '1p'
       ? (isPlayerWin ? 'Shabash! Tu jeet gaya 🎉' : 'CPU jeet gaya, phir try kar!')
       : (w === 'X' ? 'Player 1 (X) jeeta!' : 'Player 2 (O) jeeta!');
-    // GameHub rewards (1P mode, player win)
+    // Khelog rewards (1P mode, player win)
     if (mode === '1p' && isPlayerWin) {
       try {
         const c = parseInt(localStorage.getItem('coins') || '1500', 10) + 10;

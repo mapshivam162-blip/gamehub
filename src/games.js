@@ -1,4 +1,4 @@
-// GameHub game registry
+// Khelog game registry
 // Naya game add karna? Yahan ek entry + games/<id>/index.html banao.
 // status: 'ready' = Play button live | 'soon' = 🔒 Soon button
 // grad: Tailwind gradient classes for the app-icon tile

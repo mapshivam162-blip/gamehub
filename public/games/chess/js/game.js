@@ -269,7 +269,7 @@ function makeMove(startRow, startCol, endRow, endCol) {
             isGameOver = true;
             currentStatus = `Checkmate! ${currentPlayer === WHITE ? 'Black' : 'White'} wins.`;
             debugLog("Checkmate!");
-            // GameHub rewards
+            // Khelog rewards
             try {
               const gp = parseInt(localStorage.getItem('games_played') || '0', 10) + 1;
               localStorage.setItem('games_played', String(gp));

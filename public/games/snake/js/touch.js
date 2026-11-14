@@ -1,4 +1,4 @@
-// Mobile controls for GameHub (touch + pause button)
+// Mobile controls for Khelog (touch + pause button)
 // Original game was keyboard-only; ye file phone ke liye add ki gayi hai.
 
 import { playMoveSound } from "./sound.js";

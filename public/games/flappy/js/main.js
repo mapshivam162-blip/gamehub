@@ -43,7 +43,7 @@ $(document).ready(function() {
    if(window.location.search == "?easy")
       pipeheight = 200;
 
-   //get the highscore (GameHub localStorage)
+   //get the highscore (Khelog localStorage)
    var savedscore = localStorage.getItem("best_score");
    if(savedscore)
       highscore = parseInt(savedscore);
@@ -379,11 +379,11 @@ function showScore()
    {
       //yeah!
       highscore = score;
-      //save it! (GameHub localStorage)
+      //save it! (Khelog localStorage)
       localStorage.setItem("best_score", highscore.toString());
    }
 
-   // GameHub rewards: coins + games played
+   // Khelog rewards: coins + games played
    var ghCoins = parseInt(localStorage.getItem("coins") || "1500", 10);
    localStorage.setItem("coins", String(ghCoins + score * 2));
    localStorage.setItem("games_played", String(

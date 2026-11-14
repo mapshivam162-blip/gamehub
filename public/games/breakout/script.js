@@ -1,4 +1,4 @@
-// Breakout — GameHub
+// Breakout — Khelog
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;

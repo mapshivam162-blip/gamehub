@@ -1,4 +1,4 @@
-// Fruit Ninja — GameHub (real fruit images, swipe to slice)
+// Fruit Ninja — Khelog (real fruit images, swipe to slice)
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;

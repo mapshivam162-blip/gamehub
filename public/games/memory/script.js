@@ -1,4 +1,4 @@
-/* Memory Match — GameHub (casual 3D style) */
+/* Memory Match — Khelog (casual 3D style) */
 (function () {
   'use strict';
 
@@ -109,7 +109,7 @@
     const isRecord = prevBest === 0 || moves < prevBest;
     if (isRecord) { write(bKey, moves); showBest(); }
 
-    // GameHub rewards: coins + games_played
+    // Khelog rewards: coins + games_played
     const cfg = DIFF[diff];
     let coinsEarned = cfg.coin;
     if (isRecord) coinsEarned += 25;

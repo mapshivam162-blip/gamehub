@@ -225,11 +225,11 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (e.target.closest('#earn-close')) closeEarnModal();
-  // Redeem code: '99999' dalo -> 99999 coins turant
+  // Redeem code: 'ANKITPRO' dalo -> 99999 coins turant
   if (e.target.closest('#redeem-btn')) {
     const input = document.getElementById('redeem-input');
-    const code = (input?.value || '').trim();
-    if (code === '99999') {
+    const code = (input?.value || '').trim().toUpperCase();
+    if (code === 'ANKITPRO') {
       writeCoins(readCoins() + 99999);
       toast('🎉 Redeem ho gaya! +99,999 coins');
       if (input) input.value = '';

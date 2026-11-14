@@ -1,5 +1,5 @@
 // Hill Climb Racing — 2D Physics Driving Engine
-// Built for GameHub
+// Built for Khelog
 
 (function () {
   'use strict';

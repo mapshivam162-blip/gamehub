@@ -1,4 +1,4 @@
-/* Reaction Test — GameHub (casual 3D style) */
+/* Reaction Test — Khelog (casual 3D style) */
 (function () {
   'use strict';
 
@@ -137,7 +137,7 @@
     const isRecord = avg !== null && (prevBest === 0 || avg < prevBest);
     if (isRecord) { write('reaction_best', avg); showBest(); }
 
-    // GameHub rewards: coins + games_played
+    // Khelog rewards: coins + games_played
     let coinsEarned = 0;
     if (avg !== null) {
       coinsEarned = Math.max(5, Math.min(60, Math.round((500 - avg) / 10)));
