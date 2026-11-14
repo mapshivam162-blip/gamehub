@@ -163,6 +163,17 @@
 </div>
 </section>
 <!-- END: Top Profile & Balance Header -->
+<!-- BEGIN: GameHub Logo Banner -->
+<section class="mt-1 px-4" data-purpose="hero-logo">
+<div class="bg-white rounded-[26px] p-2.5 shadow-clay-card border border-white/80 flex items-center gap-3 fade-up">
+<img src="gamehub-logo.jpg" alt="GameHub" class="w-14 h-14 rounded-[20px] object-cover shadow-md">
+<div class="flex flex-col">
+<h1 class="text-base font-black text-slate-900 tracking-tight">GameHub 🎮</h1>
+<p class="text-[10px] font-bold text-slate-400">Sab games ek jagah — online + offline!</p>
+</div>
+</div>
+</section>
+<!-- END: GameHub Logo Banner -->
 <!-- BEGIN: Player Statistics Dashboard -->
 <section class="mt-2 px-4" data-purpose="player-statistics">
 <div class="flex items-center justify-between mb-2.5 px-1">
@@ -263,6 +274,27 @@
 <!-- END: Floating Bottom Navigation Bar -->
 <!-- Toast -->
 <div id="toast"></div>
+
+<!-- Earn Coins Modal (YouTube + Telegram) -->
+<div id="earn-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-6">
+  <div class="w-full max-w-[340px] bg-white rounded-[32px] border border-white shadow-2xl p-6 text-center fade-up">
+    <div class="w-20 h-20 mx-auto rounded-[26px] bg-gradient-to-tr from-amber-400 to-orange-500 shadow-lg flex items-center justify-center mb-3 overflow-hidden">
+      <img src="gamehub-logo.jpg" alt="GameHub" class="w-full h-full object-cover">
+    </div>
+    <h3 class="text-lg font-black text-slate-900">Coins kam karo! 🪙</h3>
+    <p class="text-[12px] font-bold text-slate-500 mt-1 mb-4 leading-relaxed">
+      800 🪙 chahiye game unlock karne ke liye.<br>
+      Channel visit karo, wapas aao — <b class="text-emerald-600">+1000 coins</b> milenge!
+    </p>
+    <a id="earn-youtube" class="block w-full py-3 mb-2.5 rounded-full bg-red-500 hover:bg-red-600 text-white font-black text-sm shadow-clay-btn tactile-press cursor-pointer">
+      ▶️ YouTube Channel
+    </a>
+    <a id="earn-telegram" class="block w-full py-3 mb-3 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-black text-sm shadow-clay-btn tactile-press cursor-pointer">
+      ✈️ Telegram Channel
+    </a>
+    <button id="earn-close" class="text-[11px] font-black text-slate-400 hover:text-slate-600">Baad me karna</button>
+  </div>
+</div>
 </div>
 <script type="module" src="src/main.js"></script>
 </body></html>

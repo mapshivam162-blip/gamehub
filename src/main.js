@@ -50,7 +50,87 @@ const grid = document.getElementById('games-grid');
 const countEl = document.getElementById('games-count');
 let filter = 'all';
 
+// ---------- Lock system (first 5 free, baaki 800 coins) ----------
+const UNLOCK_COUNT = 5;
+const UNLOCK_PRICE = 800;
+const FREE_IDS = games.slice(0, UNLOCK_COUNT).map((g) => g.id);
+
+function readUnlocked() {
+  try {
+    const arr = JSON.parse(localStorage.getItem('unlocked_games') || '[]');
+    return new Set([...FREE_IDS, ...arr]);
+  } catch {
+    return new Set(FREE_IDS);
+  }
+}
+function addUnlocked(id) {
+  try {
+    const arr = JSON.parse(localStorage.getItem('unlocked_games') || '[]');
+    if (!arr.includes(id)) arr.push(id);
+    localStorage.setItem('unlocked_games', JSON.stringify(arr));
+  } catch { /* ignore */ }
+}
+function readCoins() {
+  return parseInt(localStorage.getItem('coins') || '1500', 10);
+}
+function writeCoins(v) {
+  localStorage.setItem('coins', String(v));
+  if (coinsEl) coinsEl.textContent = v.toLocaleString('en-IN');
+}
+
+// ---------- Earn coins modal (YouTube + Telegram) ----------
+const YOUTUBE_URL = 'https://youtube.com/@Ankitmap';
+const TELEGRAM_URL = 'https://t.me/Ankitmap';
+const REWARD_COINS = 1000;
+
+function openEarnModal() {
+  let modal = document.getElementById('earn-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+}
+function closeEarnModal() {
+  const modal = document.getElementById('earn-modal');
+  if (modal) modal.classList.add('hidden');
+}
+function markRewardPending() {
+  localStorage.setItem('reward_pending', String(Date.now()));
+}
+// Award 1000 coins when the user comes back to the app
+function checkRewardReturn() {
+  const pending = localStorage.getItem('reward_pending');
+  if (!pending) return;
+  const elapsed = Date.now() - parseInt(pending, 10);
+  // 5s se kam me wapas aaya? Abhi award mat karo, flag rakho
+  if (elapsed < 5000) return;
+  localStorage.removeItem('reward_pending');
+  writeCoins(readCoins() + REWARD_COINS);
+  toast('🎁 Welcome back! +' + REWARD_COINS + ' coins');
+}
+window.addEventListener('focus', checkRewardReturn);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) checkRewardReturn();
+});
+// Page reload ke baad bhi (agar user tab band karke wapas aaya)
+if (localStorage.getItem('reward_pending')) {
+  setTimeout(checkRewardReturn, 1500);
+}
+
+function tryUnlock(gameId) {
+  const c = readCoins();
+  if (c >= UNLOCK_PRICE) {
+    writeCoins(c - UNLOCK_PRICE);
+    addUnlocked(gameId);
+    unlocked = readUnlocked();
+    renderGames();
+    toast('🎉 ' + UNLOCK_PRICE + ' coins me unlock ho gaya!');
+    window.location.href = 'games/' + gameId + '/index.html';
+  } else {
+    openEarnModal();
+  }
+}
+
 function renderGames() {
+  unlocked = readUnlocked();
   const list = games.filter((g) => {
     if (filter === 'all') return true;
     if (filter === '1p') return g.players === 1;
@@ -61,23 +141,33 @@ function renderGames() {
   grid.innerHTML = list
     .map((g, i) => {
       const isReady = g.status === 'ready';
+      const isUnlocked = unlocked.has(g.id);
       const href = `games/${g.id}/index.html`;
       const heat = Array.from({ length: 3 }, (_, k) =>
         k < g.heat ? '🔥' : '<span class="text-slate-300">🔥</span>'
       ).join(' ');
-      const btn = isReady
-        ? `<a href="${href}" class="card-play block w-full py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-clay-btn tactile-press text-center">Play</a>`
-        : `<button class="w-full py-1.5 rounded-full bg-slate-200 text-slate-500 font-black text-xs" disabled>🔒 Soon</button>`;
+      let btn;
+      if (isReady && isUnlocked) {
+        btn = `<a href="${href}" class="card-play block w-full py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-clay-btn tactile-press text-center">Play</a>`;
+      } else if (isReady) {
+        btn = `<button class="lock-btn block w-full py-1.5 rounded-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs shadow-clay-btn tactile-press text-center" data-lock-id="${g.id}">🔒 800 🪙</button>`;
+      } else {
+        btn = `<button class="w-full py-1.5 rounded-full bg-slate-200 text-slate-500 font-black text-xs" disabled>🔒 Soon</button>`;
+      }
       const metric = isReady ? best.toLocaleString('en-IN') : '—';
       const rate = isReady ? '98%' : '—';
+      const lockOverlay = isReady && !isUnlocked
+        ? `<div class="absolute inset-0 rounded-[20px] bg-slate-900/55 flex items-center justify-center"><span class="text-xl drop-shadow">🔒</span></div>`
+        : '';
       return `
         <div class="bg-white rounded-[28px] p-3 shadow-clay-card border border-white flex flex-col items-center text-center fade-up" style="animation-delay:${i * 60}ms">
-          <div class="w-16 h-16 rounded-[22px] bg-gradient-to-tr ${g.grad} shadow-md p-0.5 mb-2.5 overflow-hidden">
-            <div class="w-full h-full rounded-[20px] flex flex-col items-center justify-center gap-0.5" style="background:${g.tile}">
+          <div class="w-16 h-16 rounded-[22px] bg-gradient-to-tr ${g.grad} shadow-md p-0.5 mb-2.5 overflow-hidden relative">
+            <div class="w-full h-full rounded-[20px] flex flex-col items-center justify-center gap-0.5 relative" style="background:${g.tile}">
               ${g.img
-                ? `<div style="width:100%;height:100%;background-image:url('${g.img}');background-repeat:no-repeat;${g.imgStyle || ''}"></div>`
+                ? `<img src="${g.img}" alt="${g.title}" class="w-full h-full object-cover rounded-[20px]">`
                 : `<span class="text-xl leading-none">${g.emoji}</span>
               <span class="text-[7px] tracking-tighter uppercase font-extrabold text-white/80 leading-none">${g.title.split(' ')[0]}</span>`}
+              ${lockOverlay}
             </div>
           </div>
           <h3 class="text-[13px] font-black text-slate-900 truncate w-full">${g.title}</h3>
@@ -91,9 +181,49 @@ function renderGames() {
     })
     .join('');
 
-  countEl.textContent = `${ready} live · ${games.length - ready} soon`;
+  countEl.textContent = `${ready} live · ${games.length - UNLOCK_COUNT} locked`;
 }
+let unlocked = readUnlocked();
 renderGames();
+
+// Locked game buttons -> purchase / earn modal
+grid.addEventListener('click', (e) => {
+  const lockBtn = e.target.closest('button.lock-btn');
+  if (lockBtn && lockBtn.dataset.lockId) {
+    e.preventDefault();
+    tryUnlock(lockBtn.dataset.lockId);
+    return;
+  }
+  const link = e.target.closest('a.card-play');
+  if (!link) return;
+  const played = parseInt(localStorage.getItem('games_played') || '0', 10) + 1;
+  localStorage.setItem('games_played', String(played));
+  const el = document.getElementById('stat-played');
+  if (el) el.textContent = played;
+});
+
+// ---------- Earn modal buttons ----------
+document.addEventListener('click', (e) => {
+  const yt = e.target.closest('#earn-youtube');
+  if (yt) {
+    markRewardPending();
+    window.open(YOUTUBE_URL, '_blank');
+    return;
+  }
+  const tg = e.target.closest('#earn-telegram');
+  if (tg) {
+    markRewardPending();
+    window.open(TELEGRAM_URL, '_blank');
+    return;
+  }
+  if (e.target.closest('#earn-close')) closeEarnModal();
+  // "How to earn?" link bhi earn modal khole
+  const earnLink = e.target.closest('[data-purpose="earn-link"]');
+  if (earnLink) {
+    e.preventDefault();
+    openEarnModal();
+  }
+});
 
 // ---------- Filter pills ----------
 document.querySelectorAll('.filter-pill').forEach((pill) => {
@@ -107,16 +237,6 @@ document.querySelectorAll('.filter-pill').forEach((pill) => {
     pill.classList.add('border-2', 'border-pink-200/80', 'bg-white', 'shadow-pill-soft');
     renderGames();
   });
-});
-
-// ---------- Games played counter ----------
-grid.addEventListener('click', (e) => {
-  const link = e.target.closest('a.card-play');
-  if (!link) return;
-  const played = parseInt(localStorage.getItem('games_played') || '0', 10) + 1;
-  localStorage.setItem('games_played', String(played));
-  const el = document.getElementById('stat-played');
-  if (el) el.textContent = played;
 });
 
 // ---------- Online / offline ----------
