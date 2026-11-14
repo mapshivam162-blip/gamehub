@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Flappy Bird 🐤 — Khelog</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+
+<div class="wrap">
+  <div class="cabinet">
+    <div class="badge">🐤 FLAPPY BIRD</div>
+    <div class="hud">
+      <div class="hud-card"><span class="hud-label">SCORE</span><span class="hud-val" id="score">0</span></div>
+      <div class="hud-card"><span class="hud-label">BEST</span><span class="hud-val" id="best">0</span></div>
+    </div>
+    <div class="game-area">
+      <canvas id="board" width="320" height="480"></canvas>
+    </div>
+    <p class="hint">👆 Tap/Click = Flap · Space = Flap</p>
+    <div id="overlay" class="overlay">
+      <div class="overlay-card">
+        <div class="overlay-icon" id="ov-icon">🐤</div>
+        <h2 id="ov-title">Flappy Bird</h2>
+        <p id="ov-sub">Tap karke bird ko upar rakho, pipes se bachao!</p>
+
+        <div class="mode-card">
+          <h3>Difficulty</h3>
+          <div class="diff-buttons">
+            <button class="diff-btn" data-diff="easy">Easy</button>
+            <button class="diff-btn active" data-diff="medium">Medium</button>
+            <button class="diff-btn" data-diff="hard">Hard</button>
+          </div>
+        </div>
+
+        <button id="start-btn" class="start-btn">▶ Start Game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body></html>

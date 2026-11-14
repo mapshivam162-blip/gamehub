@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<meta name="theme-color" content="#121c42"/>
+<link rel="icon" type="image/svg+xml" href="icon.svg"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<title>Player Profile — Khelog</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Fredoka & Nunito for casual game feel -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="game-typography">
+    body {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .text-stroke-title {
+      -webkit-text-stroke: 4px #0c4a6e;
+      paint-order: stroke fill;
+    }
+    .text-stroke-sm {
+      -webkit-text-stroke: 2.5px #422006;
+      paint-order: stroke fill;
+    }
+    .text-stroke-level {
+      -webkit-text-stroke: 1.5px #5c381e;
+      paint-order: stroke fill;
+    }
+  </style>
+<style data-purpose="game-shadows-and-borders">
+    /* 3D Embossed effects for casual game interface */
+    .game-modal-frame {
+      border: 8px solid #0084ff;
+      box-shadow: 0 14px 0 #0054ab, 0 22px 35px rgba(0, 0, 0, 0.55);
+    }
+    .banner-badge {
+      background: linear-gradient(180deg, #38d6ff 0%, #0099ff 100%);
+      box-shadow: 0 5px 0 #0066cc, inset 0 3px 2px rgba(255, 255, 255, 0.7);
+      border: 3.5px solid #ffffff;
+    }
+    .close-btn {
+      background: linear-gradient(180deg, #ff4d4d 0%, #e60000 100%);
+      box-shadow: 0 4px 0 #990000, inset 0 2px 2px rgba(255, 255, 255, 0.6);
+      border: 3.5px solid #ffffff;
+    }
+    .stat-card {
+      background: #f8e5d0;
+      box-shadow: 0 5px 0 #e4c4a6;
+      border: 2px solid #fff5ea;
+    }
+    .user-header-card {
+      background: #f8e4cf;
+      box-shadow: 0 4px 0 #e4c4a6;
+      border: 2px solid #fff3e5;
+    }
+    .avatar-ring {
+      box-shadow: 0 0 0 3px #ffffff, 0 3px 6px rgba(0,0,0,0.25);
+    }
+    .edit-pen-btn {
+      background: linear-gradient(180deg, #32b5ff 0%, #0080ff 100%);
+      box-shadow: 0 2.5px 0 #0054ab, inset 0 1.5px 1.5px rgba(255,255,255,0.7);
+      border: 2px solid #ffffff;
+    }
+    .avatar-chip {
+      width: 2.6rem; height: 2.6rem;
+      border-radius: 999px;
+      background: #fff6ec;
+      border: 2.5px solid #fff;
+      box-shadow: 0 2.5px 0 #e4c4a6, inset 0 1.5px 1.5px rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+    .avatar-chip.selected {
+      border-color: #0084ff;
+      transform: scale(1.12);
+      background: #e3f2ff;
+    }
+    .avatar-chip:active { transform: scale(0.9); }
+
+    body {
+      background:
+        radial-gradient(circle at 20% 10%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 90%, rgba(168, 85, 247, 0.15) 0%, transparent 40%),
+        #121c42;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .fade-pop { animation: fadePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    @keyframes fadePop {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* Chhoti screens: text overlap na ho */
+    @media (max-width: 360px) {
+      .stat-card { min-height: 96px; }
+      .stat-card span:first-of-type { font-size: 9px !important; }
+      .text-stroke-title { -webkit-text-stroke-width: 3px; }
+      .game-modal-frame { padding-left: 0.75rem; padding-right: 0.75rem; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 overflow-x-hidden relative">
+<main class="relative z-10 w-full max-w-[390px] pt-7" data-purpose="profile-popup">
+<!-- BEGIN: TopModalHeaderBanner -->
+<!-- Centered blue header pill label -->
+<div class="absolute top-1 left-1/2 -translate-x-1/2 z-30">
+<div class="banner-badge px-10 py-1.5 rounded-full flex items-center justify-center">
+<h1 class="text-white text-3xl font-extrabold tracking-wider text-stroke-title drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)]">
+          Profile
+        </h1>
+</div>
+</div>
+<!-- Red Circle 'X' Close Button on Top Right -->
+<button aria-label="Close Profile" onclick="location.href='./'" class="close-btn absolute top-2 right-1 z-30 w-11 h-11 rounded-full flex items-center justify-center active:scale-95 transition-transform duration-75">
+<svg class="w-6 h-6 text-white drop-shadow-[0_2px_1px_rgba(0,0,0,0.6)]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5" viewbox="0 0 24 24">
+<line x1="18" x2="6" y1="6" y2="18"></line>
+<line x1="6" x2="18" y1="6" y2="18"></line>
+</svg>
+</button>
+<!-- END: TopModalHeaderBanner -->
+<!-- BEGIN: ModalInnerContent -->
+<div class="game-modal-frame bg-[#fff2e2] rounded-[44px] px-4 pt-10 pb-9 w-full flex flex-col gap-4 fade-pop">
+<!-- BEGIN: PlayerInfoSection -->
+<section class="user-header-card rounded-2xl p-3.5 flex items-center justify-between" data-purpose="player-summary">
+<!-- Left: Avatar with Edit Button -->
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="avatar-ring w-16 h-16 rounded-full overflow-hidden bg-gradient-to-b from-[#ff8da1] to-[#ba3c69] flex items-center justify-center border-2 border-white shadow-inner flex-col">
+<span id="profile-avatar" class="text-3xl">😎</span>
+</div>
+<!-- Edit Pencil Badge -->
+<button id="edit-name-btn" aria-label="Edit Profile Name" class="edit-pen-btn absolute -bottom-1 -right-1 w-6 h-6 rounded-lg flex items-center justify-center active:scale-90 transition-transform">
+<svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewbox="0 0 20 20">
+<path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+</svg>
+</button>
+</div>
+<!-- Name & National Flag -->
+<div class="flex flex-col">
+<span id="profile-name" class="text-[#4a2e18] text-base font-black tracking-wide leading-tight">Player123456</span>
+<div class="mt-1">
+<!-- Flag: India -->
+<span class="text-xl" title="India">🇮🇳</span>
+</div>
+</div>
+</div>
+<!-- Right: Current Level -->
+<div class="flex flex-col items-center justify-center text-center pr-1">
+<span class="text-[#8c5e3c] text-xs font-black uppercase tracking-tight leading-none mb-0.5">Current<br/>Level</span>
+<span id="profile-level" class="text-[#5c381e] text-2xl font-black leading-tight">1</span>
+</div>
+</section>
+<!-- END: PlayerInfoSection -->
+<!-- BEGIN: StatsGridSection -->
+<section class="grid grid-cols-3 gap-2.5" data-purpose="game-achievements-grid">
+<!-- Tile 1: High Score -->
+<div class="stat-card rounded-2xl p-2 flex flex-col items-center justify-between text-center min-h-[110px]">
+<div class="h-12 flex items-center justify-center">
+<svg class="w-12 h-12 drop-shadow-[0_4px_3px_rgba(0,0,0,0.15)]" fill="none" viewbox="0 0 64 64">
+<path d="M12 14L22 24M10 18L18 26M18 10L26 18" stroke="#a855f7" stroke-linecap="round" stroke-width="4.5"></path>
+<path d="M22 24L26 28" stroke="#7e22ce" stroke-width="4"></path>
+<circle cx="38" cy="36" fill="#38bdf8" r="20"></circle>
+<circle cx="38" cy="36" fill="#0284c7" r="15"></circle>
+<circle cx="38" cy="36" fill="#c084fc" r="10"></circle>
+<circle cx="38" cy="36" fill="#e879f9" r="5"></circle>
+<circle cx="38" cy="36" fill="#ffffff" r="2"></circle>
+</svg>
+</div>
+<span class="text-[#966b4d] text-[10px] font-black leading-tight tracking-tight">High Score</span>
+<span id="st-highscore" class="text-[#3b2314] text-base font-black leading-tight">0</span>
+</div>
+<!-- Tile 2: Games Played -->
+<div class="stat-card rounded-2xl p-2 flex flex-col items-center justify-between text-center min-h-[110px]">
+<div class="h-12 flex items-center justify-center">
+<svg class="w-11 h-11 drop-shadow-[0_4px_3px_rgba(0,0,0,0.15)]" fill="none" viewbox="0 0 64 64">
+<path d="M32 38L48 29V39L32 48L16 39V29L32 38Z" fill="#0284c7"></path>
+<path d="M32 38L48 29L32 20L16 29L32 38Z" fill="#38bdf8"></path>
+<path d="M32 48L48 39V44L32 53L16 44V39L32 48Z" fill="#0369a1"></path>
+<path d="M32 28L44 21.5V29L32 35.5L20 29V21.5L32 28Z" fill="#06b6d4"></path>
+<path d="M32 28L44 21.5L32 15L20 21.5L32 28Z" fill="#67e8f9"></path>
+<path d="M32 18L40 13.5V19L32 23.5L24 19V13.5L32 18Z" fill="#db2777"></path>
+<path d="M32 18L40 13.5L32 9L24 13.5L32 18Z" fill="#f472b6"></path>
+</svg>
+</div>
+<span class="text-[#966b4d] text-[10px] font-black leading-tight tracking-tight">Games Played</span>
+<span id="st-played" class="text-[#3b2314] text-base font-black leading-tight">0</span>
+</div>
+<!-- Tile 3: Daily Streak -->
+<div class="stat-card rounded-2xl p-2 flex flex-col items-center justify-between text-center min-h-[110px]">
+<div class="h-12 flex items-center justify-center">
+<svg class="w-11 h-11 drop-shadow-[0_4px_3px_rgba(0,0,0,0.15)]" fill="none" viewbox="0 0 64 64">
+<rect fill="#b91c1c" height="36" rx="7" width="34" x="15" y="16"></rect>
+<rect fill="#fef3c7" height="28" rx="6" width="34" x="15" y="24"></rect>
+<rect fill="#f59e0b" height="8" rx="2" width="4" x="22" y="12"></rect>
+<rect fill="#f59e0b" height="8" rx="2" width="4" x="38" y="12"></rect>
+<text fill="#0284c7" font-family="'Nunito', sans-serif" font-size="22" font-weight="900" text-anchor="middle" id="st-streak-text" x="32" y="44">1</text>
+</svg>
+</div>
+<span class="text-[#966b4d] text-[10px] font-black leading-tight tracking-tight">Daily Streak</span>
+<span id="st-streak" class="text-[#3b2314] text-base font-black leading-tight">1</span>
+</div>
+<!-- Tile 4: Current League -->
+<div class="stat-card rounded-2xl p-2 flex flex-col items-center justify-between text-center min-h-[110px]">
+<div class="h-12 flex items-center justify-center">
+<svg class="w-11 h-11 drop-shadow-[0_4px_3px_rgba(0,0,0,0.15)]" fill="none" viewbox="0 0 64 64">
+<path d="M18 20H13C10.8 20 9 21.8 9 24C9 28 12.5 31 16.5 31.8" stroke="#b0725a" stroke-linecap="round" stroke-width="3"></path>
+<path d="M46 20H51C53.2 20 55 21.8 55 24C55 28 51.5 31 47.5 31.8" stroke="#b0725a" stroke-linecap="round" stroke-width="3"></path>
+<path d="M16 16H48V28C48 36.8 40.8 44 32 44C23.2 44 16 36.8 16 28V16Z" fill="#d2896c"></path>
+<path d="M19 19H45V27C45 34.2 39.2 40 32 40C24.8 40 19 34.2 19 27V19Z" fill="#df9b7e"></path>
+<rect fill="#b0725a" height="7" width="6" x="29" y="43"></rect>
+<path d="M22 50C22 49 24 48 32 48C40 48 42 49 42 50L44 54H20L22 50Z" fill="#b0725a"></path>
+<ellipse cx="32" cy="16" fill="#ecb095" rx="16" ry="3"></ellipse>
+</svg>
+</div>
+<span class="text-[#966b4d] text-[10px] font-black leading-tight tracking-tight">Current League</span>
+<span id="st-league" class="text-[#3b2314] text-base font-black leading-tight">Bronze</span>
+</div>
+<!-- Tile 5: XP Points -->
+<div class="stat-card rounded-2xl p-2 flex flex-col items-center justify-between text-center min-h-[110px]">
+<div class="h-12 flex items-center justify-center">
+<svg class="w-11 h-11 drop-shadow-[0_4px_3px_rgba(255,140,0,0.3)]" fill="none" viewbox="0 0 64 64">
+<path d="M32 8C33 18 48 24 48 38C48 48 40.8 56 32 56C23.2 56 16 48 16 38C16 26 26 18 32 8Z" fill="url(#flameOuter)"></path>
+<path d="M32 20C34 26 42 30 42 40C42 46 37 51 32 51C27 51 22 46 22 40C22 32 28 26 32 20Z" fill="#ff7800"></path>
+<path d="M32 30C34 34 38 37 38 42C38 46 35 48 32 48C29 48 26 46 26 42C26 37 30 34 32 30Z" fill="#ffde43"></path>
+<defs>
+<lineargradient gradientunits="userSpaceOnUse" id="flameOuter" x1="32" x2="32" y1="8" y2="56">
+<stop stop-color="#ff4500"></stop>
+<stop offset="1" stop-color="#f97316"></stop>
+</lineargradient>
+</defs>
+</svg>
+</div>
+<span class="text-[#966b4d] text-[10px] font-black leading-tight tracking-tight">XP Points</span>
+<span id="st-xp" class="text-[#3b2314] text-base font-black leading-tight">0</span>
+</div>
+<!-- Tile 6: Win Streak -->
+<div class="stat-card rounded-2xl p-2 flex flex-col items-center justify-between text-center min-h-[110px]">
+<div class="h-12 flex items-center justify-center">
+<svg class="w-11 h-11 drop-shadow-[0_4px_3px_rgba(0,0,0,0.15)]" fill="none" viewbox="0 0 64 64">
+<circle cx="32" cy="34" fill="#f59e0b" r="21"></circle>
+<circle cx="32" cy="34" fill="#d97706" r="18"></circle>
+<path d="M32 34 L32 16 A18 18 0 0 1 49 26 Z" fill="#ef4444"></path>
+<path d="M32 34 L49 26 A18 18 0 0 1 47 43 Z" fill="#3b82f6"></path>
+<path d="M32 34 L47 43 A18 18 0 0 1 32 52 Z" fill="#22c55e"></path>
+<path d="M32 34 L32 52 A18 18 0 0 1 17 43 Z" fill="#eab308"></path>
+<path d="M32 34 L17 43 A18 18 0 0 1 15 26 Z" fill="#ec4899"></path>
+<path d="M32 34 L15 26 A18 18 0 0 1 32 16 Z" fill="#a855f7"></path>
+<circle cx="32" cy="34" fill="#fef08a" r="5" stroke="#ca8a04" stroke-width="1.5"></circle>
+<circle cx="32" cy="34" fill="#e11d48" r="2"></circle>
+</svg>
+</div>
+<span class="text-[#966b4d] text-[10px] font-black leading-tight tracking-tight">Win Streak</span>
+<span id="st-winstreak" class="text-[#3b2314] text-base font-black leading-tight">00</span>
+</div>
+</section>
+<!-- END: StatsGridSection -->
+<!-- BEGIN: EditorSection (pencil button se khulta hai) -->
+<section id="profile-editor" class="hidden user-header-card rounded-2xl p-3.5 flex flex-col gap-3" data-purpose="profile-editor">
+<!-- Name -->
+<div>
+<label class="text-[#8c5e3c] text-[10px] font-black uppercase tracking-tight">Player Name</label>
+<div class="mt-1 flex items-center gap-1.5">
+<input id="editor-name" type="text" maxlength="16" minlength="2" placeholder="Naam likho" class="flex-1 min-w-0 bg-[#fff6ec] border-2 border-white rounded-xl px-3 py-1.5 text-xs font-bold text-[#3b2314] focus:outline-none focus:border-[#0084ff]" style="box-shadow: inset 0 2px 3px rgba(0,0,0,0.06);"/>
+<button id="save-name-btn" class="bg-gradient-to-b from-[#38d6ff] to-[#0084ff] border-2 border-white rounded-xl px-3 py-1.5 text-white text-[11px] font-black btn-3d-blue shrink-0">Save</button>
+</div>
+</div>
+<!-- Avatars -->
+<div>
+<label class="text-[#8c5e3c] text-[10px] font-black uppercase tracking-tight">Avatar — 5 random icons</label>
+<div class="mt-1.5 flex items-center justify-between gap-1">
+<div id="editor-avatars" class="flex items-center gap-1.5 flex-wrap"></div>
+<button id="shuffle-btn" aria-label="Naye icons lao" class="w-8 h-8 rounded-lg bg-[#fff6ec] border-2 border-white flex items-center justify-center text-sm shrink-0" style="box-shadow: 0 2.5px 0 #e4c4a6;">🔄</button>
+</div>
+</div>
+</section>
+<!-- END: EditorSection -->
+</div>
+<!-- END: ModalInnerContent -->
+</main>
+<script>
+    // ---- helpers ----
+    const AVATAR_POOL = ['😎','🤖','👾','🐼','🦊','🐸','🐯','🦁','🦄','🐨','🐷','🐵','🐰','🐻','🐶','🦖','🐙','🐝','🐺','🐴'];
+    const getAvatar = () => localStorage.getItem('player_avatar') || '😎';
+    const getName = () => localStorage.getItem('player_name') || 'Player123456';
+
+    // ---- Working profile data (localStorage se) ----
+    const best = parseInt(localStorage.getItem('best_score') || '0', 10);
+    const played = parseInt(localStorage.getItem('games_played') || '0', 10);
+    const streak = parseInt(localStorage.getItem('streak') || '1', 10);
+    const xp = best + played * 10;
+    const league = best >= 50 ? 'Gold' : best >= 20 ? 'Silver' : 'Bronze';
+    const level = 1 + Math.floor(xp / 100);
+
+    document.getElementById('profile-name').textContent = getName();
+    document.getElementById('profile-avatar').textContent = getAvatar();
+    document.getElementById('profile-level').textContent = level;
+    document.getElementById('st-highscore').textContent = best;
+    document.getElementById('st-played').textContent = played;
+    document.getElementById('st-streak').textContent = streak;
+    document.getElementById('st-streak-text').textContent = streak;
+    document.getElementById('st-league').textContent = league;
+    document.getElementById('st-xp').textContent = xp;
+
+    // ---- Editor section (pencil button se toggle) ----
+    const editor = document.getElementById('profile-editor');
+    const editorName = document.getElementById('editor-name');
+    const avatarRow = document.getElementById('editor-avatars');
+
+    editorName.value = getName() === 'Player123456' ? '' : getName();
+    editorName.placeholder = getName();
+
+    function renderAvatars() {
+      const shuffled = [...AVATAR_POOL].sort(() => Math.random() - 0.5);
+      const picks = shuffled.slice(0, 5);
+      const current = getAvatar();
+      avatarRow.innerHTML = picks.map(e =>
+        `<button class="avatar-chip ${e === current ? 'selected' : ''}" data-avatar="${e}">${e}</button>`
+      ).join('');
+    }
+    renderAvatars();
+
+    document.getElementById('shuffle-btn').addEventListener('click', renderAvatars);
+
+    avatarRow.addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-avatar]');
+      if (!chip) return;
+      const emoji = chip.dataset.avatar;
+      localStorage.setItem('player_avatar', emoji);
+      document.getElementById('profile-avatar').textContent = emoji;
+      avatarRow.querySelectorAll('.avatar-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+
+    document.getElementById('save-name-btn').addEventListener('click', () => {
+      const next = editorName.value.trim();
+      if (next.length < 2) { alert('Naam kam se kam 2 letters ka rakho 😅'); return; }
+      localStorage.setItem('player_name', next);
+      document.getElementById('profile-name').textContent = next;
+    });
+
+    // ---- Edit pencil button: editor kholo / band karo ----
+    document.getElementById('edit-name-btn').addEventListener('click', () => {
+      editor.classList.toggle('hidden');
+      if (!editor.classList.contains('hidden')) editorName.focus();
+    });
+  </script>
+</body></html>
