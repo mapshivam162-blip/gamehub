@@ -30,7 +30,8 @@ birdImg.src = 'assets/bird.png';
 // bird frame animation
 let birdFrame = 1; // 0,1,2
 let birdFrameTimer = 0;
-const bestEl = document.getElementById('best');
+const bestEl = document.getElementById("best");
+const scoreEl = document.getElementById("score");
 const overlay = document.getElementById('overlay');
 const ovIcon = document.getElementById('ov-icon');
 const ovTitle = document.getElementById('ov-title');

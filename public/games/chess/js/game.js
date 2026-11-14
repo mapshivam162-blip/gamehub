@@ -71,8 +71,10 @@ function initializeGame() {
  * @param {Event} event - The click event
  */
 function handleBoardClickEvent(event) {
+    console.log('CLICK event fired, target:', event.target.className);
     // Ignore clicks that happen right after a drag operation
     if (typeof window.dragJustEnded !== 'undefined' && window.dragJustEnded) {
+        console.log('dragJustEnded, ignoring');
         return;
     }
     
@@ -119,6 +121,7 @@ function resetGame() {
  * @param {number} col
  */
 function handleBoardClick(row, col) {
+    console.log('handleBoardClick', row, col, 'piece:', boardState[row][col]?.color, boardState[row][col]?.type, 'currentPlayer:', currentPlayer);
     if (isGameOver) return; // Don't allow moves if game is over
 
     const clickedPiece = boardState[row][col];

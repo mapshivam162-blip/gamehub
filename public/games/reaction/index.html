@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Reaction Test ⚡ — GameHub</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+
+<div class="wrap">
+  <div class="cabinet">
+    <div class="badge">⚡ REACTION TEST</div>
+    <div class="hud">
+      <div class="hud-card"><span class="hud-label">ROUND</span><span class="hud-val" id="round">0/5</span></div>
+      <div class="hud-card"><span class="hud-label">AVG</span><span class="hud-val" id="avg">—</span></div>
+      <div class="hud-card"><span class="hud-label">BEST</span><span class="hud-val" id="best">—</span></div>
+    </div>
+    <div class="pad-wrap">
+      <div id="pad" class="pad idle">
+        <div class="pad-icon" id="pad-icon">👆</div>
+        <div class="pad-text" id="pad-text">Tap to Start</div>
+        <div class="pad-sub" id="pad-sub">Green dikhte hi tap karo!</div>
+      </div>
+    </div>
+    <div class="history-row">
+      <span class="history-label">LAST:</span>
+      <div id="history" class="history">— — — — —</div>
+    </div>
+    <div id="overlay" class="overlay">
+      <div class="overlay-card">
+        <div class="overlay-icon" id="ov-icon">⚡</div>
+        <h2 id="ov-title">Reaction Test</h2>
+        <p id="ov-sub">5 rounds. Green pe tap karo — late = miss!</p>
+        <button id="start-btn" class="start-btn">▶ Start</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body></html>

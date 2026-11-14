@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#1a233a"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Hill Climb Racing 🏎️ — GameHub</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&family=Nunito+Sans:wght@700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<a id="back-btn" href="../../" aria-label="GameHub pe wapas jao">←</a>
+
+<div class="game-container">
+  <!-- Top HUD Bar -->
+  <header class="hud-top">
+    <div class="hud-stat-pill coins-pill">
+      <span class="icon">🪙</span>
+      <span id="hud-coins" class="stat-val">0</span>
+    </div>
+    <div class="hud-stat-pill gems-pill">
+      <span class="icon">💎</span>
+      <span id="hud-gems" class="stat-val">0</span>
+    </div>
+    <div class="hud-stat-pill dist-pill">
+      <span class="icon">🚩</span>
+      <span id="hud-dist" class="stat-val">0m</span>
+    </div>
+    <div class="hud-actions">
+      <button id="cheat-btn" class="hud-btn cheat-btn" title="Set 999,999 Coins & Gems">
+        ⚡ 999k
+      </button>
+      <button id="garage-btn" class="hud-btn garage-btn" title="Open Garage">
+        🔧 Garage
+      </button>
+      <button id="sound-btn" class="hud-btn sound-btn" title="Mute/Unmute">
+        🔊
+      </button>
+      <button id="restart-btn" class="hud-btn restart-btn" title="Restart">
+        🔄
+      </button>
+    </div>
+  </header>
+
+  <!-- Canvas Stage -->
+  <div class="canvas-wrapper">
+    <canvas id="gameCanvas" width="840" height="480"></canvas>
+    
+    <!-- Fuel Gauge overlay -->
+    <div class="fuel-container">
+      <div class="fuel-header">
+        <span class="fuel-label">⛽ FUEL</span>
+        <span id="fuel-pct" class="fuel-pct">100%</span>
+      </div>
+      <div class="fuel-track">
+        <div id="fuel-bar" class="fuel-fill"></div>
+      </div>
+    </div>
+
+    <!-- Air / Flip / Bonus Popups -->
+    <div id="air-bonus" class="air-bonus">BACKFLIP! +1,000</div>
+
+    <!-- Start / Resume Overlay -->
+    <div id="start-overlay" class="game-overlay active">
+      <div class="overlay-modal">
+        <div class="modal-icon">🏎️💨</div>
+        <h1 class="modal-title">HILL CLIMB RACING</h1>
+        <p class="modal-desc">Bumpy hills, steep climbs, coins & gems! Fuel khatam mat hone dena.</p>
+        <div class="controls-hint">
+          <span>🛑 Left: BRAKE / TILT BACK</span>
+          <span>🟢 Right: GAS / TILT FORWARD</span>
+        </div>
+        <div class="modal-btns">
+          <button id="play-btn" class="btn btn-primary">▶ DRIVE NOW</button>
+          <button id="open-garage-start" class="btn btn-secondary">🔧 GARAGE & UPGRADES</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="gameover-overlay" class="game-overlay">
+      <div class="overlay-modal">
+        <div id="gameover-icon" class="modal-icon">💥</div>
+        <h2 id="gameover-title" class="modal-title">DRIVER DOWN!</h2>
+        <p id="gameover-reason" class="modal-desc">Neck flip ya fuel khatam ho gaya.</p>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="label">DISTANCE</span>
+            <span id="res-dist" class="val">0m</span>
+          </div>
+          <div class="result-card">
+            <span class="label">COINS EARNED</span>
+            <span id="res-coins" class="val">+0</span>
+          </div>
+          <div class="result-card">
+            <span class="label">BEST RECORD</span>
+            <span id="res-best" class="val">0m</span>
+          </div>
+        </div>
+        <div class="modal-btns">
+          <button id="retry-btn" class="btn btn-primary">🔄 TRY AGAIN</button>
+          <button id="open-garage-end" class="btn btn-secondary">🔧 UPGRADE CAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Touch Driving Pedals Bar -->
+  <div class="controls-bar">
+    <button id="pedal-brake" class="pedal pedal-brake">
+      <div class="pedal-top">🛑</div>
+      <div class="pedal-name">BRAKE</div>
+      <div class="pedal-sub">REVERSE / TILT BACK</div>
+    </button>
+    <div class="pedal-center-info">
+      <div class="speed-cluster">
+        <span id="speed-meter" class="speed-val">0</span>
+        <span class="speed-unit">KM/H</span>
+      </div>
+    </div>
+    <button id="pedal-gas" class="pedal pedal-gas">
+      <div class="pedal-top">⚡</div>
+      <div class="pedal-name">GAS</div>
+      <div class="pedal-sub">THROTTLE / TILT FWD</div>
+    </button>
+  </div>
+</div>
+
+<!-- Garage & Upgrades Modal -->
+<div id="garage-modal" class="garage-modal">
+  <div class="garage-content">
+    <div class="garage-header">
+      <h2>🔧 CAR GARAGE</h2>
+      <div class="garage-wallets">
+        <span class="pill">🪙 <b id="garage-coins">0</b></span>
+        <span class="pill">💎 <b id="garage-gems">0</b></span>
+      </div>
+      <button id="close-garage" class="close-x">✕</button>
+    </div>
+
+    <!-- Quick 999k Cheat inside Garage -->
+    <div class="cheat-banner">
+      <span>🚀 Quick Max Currency:</span>
+      <button id="garage-cheat-btn" class="cheat-pill">⚡ Set 999,999 Coins & Gems</button>
+    </div>
+
+    <div class="upgrades-list">
+      <!-- Engine -->
+      <div class="upgrade-item" data-type="engine">
+        <div class="up-icon">🏎️</div>
+        <div class="up-info">
+          <div class="up-title">Engine (Power & Speed)</div>
+          <div class="up-level" id="lvl-engine">Level 1 / 10</div>
+          <div class="up-bar"><div id="bar-engine" class="up-fill" style="width:10%"></div></div>
+        </div>
+        <button id="btn-up-engine" class="up-buy-btn">
+          <span>Upgrade</span>
+          <span class="cost">🪙 <b id="cost-engine">500</b></span>
+        </button>
+      </div>
+
+      <!-- Suspension -->
+      <div class="upgrade-item" data-type="suspension">
+        <div class="up-icon">🔩</div>
+        <div class="up-info">
+          <div class="up-title">Suspension (Shocks & Stability)</div>
+          <div class="up-level" id="lvl-suspension">Level 1 / 10</div>
+          <div class="up-bar"><div id="bar-suspension" class="up-fill" style="width:10%"></div></div>
+        </div>
+        <button id="btn-up-suspension" class="up-buy-btn">
+          <span>Upgrade</span>
+          <span class="cost">🪙 <b id="cost-suspension">400</b></span>
+        </button>
+      </div>
+
+      <!-- Tires -->
+      <div class="upgrade-item" data-type="tires">
+        <div class="up-icon">🛞</div>
+        <div class="up-info">
+          <div class="up-title">Tires (Hill Grip & Traction)</div>
+          <div class="up-level" id="lvl-tires">Level 1 / 10</div>
+          <div class="up-bar"><div id="bar-tires" class="up-fill" style="width:10%"></div></div>
+        </div>
+        <button id="btn-up-tires" class="up-buy-btn">
+          <span>Upgrade</span>
+          <span class="cost">🪙 <b id="cost-tires">450</b></span>
+        </button>
+      </div>
+
+      <!-- 4WD -->
+      <div class="upgrade-item" data-type="fourwd">
+        <div class="up-icon">⚙️</div>
+        <div class="up-info">
+          <div class="up-title">4WD (All-Wheel Drive Torque)</div>
+          <div class="up-level" id="lvl-fourwd">Level 1 / 10</div>
+          <div class="up-bar"><div id="bar-fourwd" class="up-fill" style="width:10%"></div></div>
+        </div>
+        <button id="btn-up-fourwd" class="up-buy-btn">
+          <span>Upgrade</span>
+          <span class="cost">💎 <b id="cost-fourwd">5</b></span>
+        </button>
+      </div>
+    </div>
+
+    <button id="garage-start-drive" class="btn btn-primary full-w">🏁 READY! LET'S DRIVE</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
