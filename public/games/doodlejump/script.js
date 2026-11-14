@@ -5,7 +5,7 @@ const W = canvas.width, H = canvas.height;
 // 3D player character (AI generated, transparent PNG)
 const player3dImg = new Image(); player3dImg.src = 'assets/player3d.png';
 
-let player = { x: W/2, y: H - 60, vx: 0, vy: 0, w: 32, h: 32 };
+let player = { x: W/2, y: H - 40 - 32, vx: 0, vy: 0, w: 32, h: 32 };
 let platforms = [];
 let cameraY = 0;
 let score = 0, best = parseInt(localStorage.getItem('best_score') || '0', 10);
@@ -41,11 +41,12 @@ function buildInitialPlatforms() {
 }
 
 function startGame() {
-  player = { x: W/2, y: H - 60, vx: 0, vy: 0, w: 32, h: 32 };
+  player = { x: W/2, y: H - 40 - 32, vx: 0, vy: 0, w: 32, h: 32 }; // base platform ke UPAR khada
   cameraY = 0;
   score = 0; gameOver = false; started = true; moveDir = 0;
   scoreEl.textContent = '0';
   buildInitialPlatforms();
+  player.vy = JUMP_VEL * 0.85; // pehla bounce
   ovIcon.textContent = '🐸'; ovTitle.textContent = 'Doodle Jump';
   ovSub.textContent = 'Tap left/right to move, platforms pe jump!';
   startBtn.textContent = '▶ Start Game';
@@ -72,7 +73,7 @@ function update() {
       if (p.broken) continue;
       const py = p.y - cameraY;
       if (!(player.x + player.w > p.x && player.x < p.x + p.w)) continue;
-      if (prevBottom <= py + 4 && currBottom >= py - 2) {
+      if (prevBottom <= py + 8 && currBottom >= py - 2) {
         if (p.type === 'breakable') { p.broken = true; continue; }
         player.y = py - player.h;
         player.vy = JUMP_VEL;

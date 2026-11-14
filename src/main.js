@@ -225,6 +225,26 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (e.target.closest('#earn-close')) closeEarnModal();
+  // Redeem code: '99999' dalo -> 99999 coins turant
+  if (e.target.closest('#redeem-btn')) {
+    const input = document.getElementById('redeem-input');
+    const code = (input?.value || '').trim();
+    if (code === '99999') {
+      writeCoins(readCoins() + 99999);
+      toast('🎉 Redeem ho gaya! +99,999 coins');
+      if (input) input.value = '';
+    } else {
+      toast('❌ Galat code hai!');
+    }
+    return;
+  }
+  // Enter key se bhi redeem
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && ev.target && ev.target.id === 'redeem-input') {
+      const btn = document.getElementById('redeem-btn');
+      if (btn) btn.click();
+    }
+  });
   // "How to earn?" link bhi earn modal khole
   const earnLink = e.target.closest('[data-purpose="earn-link"]');
   if (earnLink) {

@@ -156,6 +156,8 @@
     coins: 1500,
     gems: 10,
     bestDist: 0,
+    vehicle: 'jeep',
+    ownedVehicles: ['jeep'],
     upgrades: {
       engine: 1,
       suspension: 1,
@@ -163,6 +165,36 @@
       fourwd: 1,
     },
   };
+
+  // --- Vehicles ---
+  const VEHICLES = {
+    jeep: {
+      name: 'Offroad Jeep',
+      emoji: '🚙',
+      color: '#dc2626',
+      dark: '#991b1b',
+      wheelRadius: 16,
+      wheelBase: 44,
+      powerMul: 1,
+      price: 0,
+    },
+    monster: {
+      name: 'Monster Truck',
+      emoji: '🛻',
+      color: '#2563eb',
+      dark: '#1e40af',
+      wheelRadius: 22,
+      wheelBase: 52,
+      powerMul: 1.3,
+      price: 2500,
+    },
+  };
+
+  function applyVehicle() {
+    const v = VEHICLES[gameData.vehicle] || VEHICLES.jeep;
+    car.wheelRadius = v.wheelRadius;
+    car.wheelBase = v.wheelBase;
+  }
 
   function loadData() {
     try {
@@ -375,7 +407,10 @@
     btn.addEventListener('pointerdown', activate);
     btn.addEventListener('pointerup', deactivate);
     btn.addEventListener('pointercancel', deactivate);
-    btn.addEventListener('pointerleave', deactivate);
+    // touch fallback (kuch phones pe pointer events scroll cancel ho jate hain)
+    btn.addEventListener('touchstart', (e) => { e.preventDefault(); activate(e); }, { passive: false });
+    btn.addEventListener('touchend', (e) => { e.preventDefault(); deactivate(e); }, { passive: false });
+    btn.addEventListener('touchcancel', (e) => { e.preventDefault(); deactivate(e); }, { passive: false });
   }
   bindTouch(pedalGas, 'gas');
   bindTouch(pedalBrake, 'brake');
@@ -415,6 +450,7 @@
   // --- Reset & Start Game ---
   function startGame() {
     initAudio();
+    applyVehicle();
     car.x = 80;
     car.y = getTerrainHeight(80) - 40;
     car.vx = 0;
@@ -472,8 +508,49 @@
   function openGarageView() {
     garageModal.classList.add('active');
     renderGarage();
+    refreshVehicleUI();
   }
   garageBtn.addEventListener('click', openGarageView);
+
+  // --- Vehicle selection ---
+  function refreshVehicleUI() {
+    document.querySelectorAll('.vehicle-card').forEach((card) => {
+      const vid = card.dataset.vehicle;
+      const v = VEHICLES[vid];
+      const owned = gameData.ownedVehicles.includes(vid);
+      const selected = gameData.vehicle === vid;
+      card.classList.toggle('selected', selected);
+      card.classList.toggle('locked', !owned);
+      const priceEl = card.querySelector('[data-role="price"]');
+      if (priceEl) priceEl.textContent = selected ? '✓ SELECTED' : (owned ? 'OWNED' : '🪙 ' + v.price.toLocaleString('en-IN'));
+    });
+  }
+  document.querySelectorAll('.vehicle-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const vid = card.dataset.vehicle;
+      const v = VEHICLES[vid];
+      if (!v) return;
+      if (gameData.ownedVehicles.includes(vid)) {
+        gameData.vehicle = vid;
+      } else if (gameData.coins >= v.price) {
+        gameData.coins -= v.price;
+        gameData.ownedVehicles.push(vid);
+        gameData.vehicle = vid;
+      } else {
+        const priceEl = card.querySelector('[data-role="price"]');
+        if (priceEl) {
+          priceEl.textContent = ' Coins kam!';
+          priceEl.style.color = '#f87171';
+          setTimeout(() => { priceEl.style.color = ''; refreshVehicleUI(); }, 1200);
+        }
+        return;
+      }
+      saveData();
+      updateHUD();
+      refreshVehicleUI();
+      applyVehicle();
+    });
+  });
   openGarageStart.addEventListener('click', openGarageView);
   openGarageEnd.addEventListener('click', openGarageView);
   closeGarage.addEventListener('click', () => garageModal.classList.remove('active'));
@@ -487,7 +564,7 @@
     if (!isPlaying) return;
 
     // Upgrades modifiers
-    const enginePower = 0.38 + gameData.upgrades.engine * 0.055;
+    const enginePower = (0.38 + gameData.upgrades.engine * 0.055) * ((VEHICLES[gameData.vehicle] || VEHICLES.jeep).powerMul || 1);
     const suspStiffness = 0.18 + gameData.upgrades.suspension * 0.02;
     const tireGrip = 0.88 + gameData.upgrades.tires * 0.02;
     const is4WD = gameData.upgrades.fourwd > 1;
@@ -983,19 +1060,31 @@
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(hx + 1, hy + 2, 7, 4);
 
-    // 4. Chassis Body (Red Offroad Jeep)
-    ctx.fillStyle = '#dc2626';
+    // 4. Chassis Body (vehicle-specific)
+    const veh = VEHICLES[gameData.vehicle] || VEHICLES.jeep;
+    ctx.fillStyle = veh.color;
     ctx.beginPath();
-    ctx.moveTo(-28, 6);
-    ctx.lineTo(28, 6);
-    ctx.lineTo(26, -6);
-    ctx.lineTo(12, -8);
-    ctx.lineTo(2, -20);
-    ctx.lineTo(-20, -20);
-    ctx.lineTo(-26, -6);
+    if (gameData.vehicle === 'monster') {
+      // badi, bulbous monster truck body
+      ctx.moveTo(-30, 8);
+      ctx.lineTo(30, 8);
+      ctx.lineTo(29, -8);
+      ctx.lineTo(14, -12);
+      ctx.lineTo(4, -26);
+      ctx.lineTo(-22, -26);
+      ctx.lineTo(-29, -8);
+    } else {
+      ctx.moveTo(-28, 6);
+      ctx.lineTo(28, 6);
+      ctx.lineTo(26, -6);
+      ctx.lineTo(12, -8);
+      ctx.lineTo(2, -20);
+      ctx.lineTo(-20, -20);
+      ctx.lineTo(-26, -6);
+    }
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#991b1b';
+    ctx.strokeStyle = veh.dark;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -1003,10 +1092,17 @@
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(-18, 6);
-    ctx.lineTo(-18, -19);
-    ctx.lineTo(2, -19);
-    ctx.lineTo(12, -7);
+    if (gameData.vehicle === 'monster') {
+      ctx.moveTo(-19, 8);
+      ctx.lineTo(-19, -25);
+      ctx.lineTo(3, -25);
+      ctx.lineTo(13, -11);
+    } else {
+      ctx.moveTo(-18, 6);
+      ctx.lineTo(-18, -19);
+      ctx.lineTo(2, -19);
+      ctx.lineTo(12, -7);
+    }
     ctx.stroke();
 
     // Headlight
@@ -1073,6 +1169,9 @@
 
   // Initialize
   loadData();
+  if (!gameData.ownedVehicles.includes(gameData.vehicle)) gameData.vehicle = 'jeep';
+  applyVehicle();
+  refreshVehicleUI();
   renderGarage();
   requestAnimationFrame(gameLoop);
 })();
