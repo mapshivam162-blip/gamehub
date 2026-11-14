@@ -2,6 +2,8 @@
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;
+// 3D player character (AI generated, transparent PNG)
+const player3dImg = new Image(); player3dImg.src = 'assets/player3d.png';
 
 let player = { x: W/2, y: H - 60, vx: 0, vy: 0, w: 32, h: 32 };
 let platforms = [];
@@ -176,13 +178,22 @@ function draw() {
     }
   }
 
-  // player (doodle) with 3D look
+  // player (doodle) — 3D AI character image, gradient fallback
   const px = player.x, py = player.y - cameraY;
   // shadow
   ctx.fillStyle = 'rgba(0,0,0,0.2)';
   ctx.beginPath();
   ctx.ellipse(px + player.w/2, py + player.h + 2, player.w/2 - 2, 4, 0, 0, Math.PI * 2);
   ctx.fill();
+  if (player3dImg.complete && player3dImg.naturalWidth) {
+    // slight lean in the move direction
+    ctx.save();
+    ctx.translate(px + player.w/2, py + player.h/2);
+    ctx.rotate(moveDir * 0.08);
+    const pw = player.w + 6, ph = (player.w + 6) * (player3dImg.naturalHeight / player3dImg.naturalWidth);
+    ctx.drawImage(player3dImg, -pw/2, -ph/2 + 2, pw, ph);
+    ctx.restore();
+  } else {
   // body gradient
   const bodyGrad = ctx.createRadialGradient(px + 8, py + 8, 2, px + player.w/2, py + player.h/2, player.w/2);
   bodyGrad.addColorStop(0, '#f9e79f');
@@ -207,6 +218,7 @@ function draw() {
   ctx.fillStyle = '#e67e22';
   ctx.fillRect(px + 4, py + 26, 8, 6);
   ctx.fillRect(px + 20, py + 26, 8, 6);
+  }
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.fillRect(px + 4, py + 26, 8, 2);
   ctx.fillRect(px + 20, py + 26, 8, 2);

@@ -18,5 +18,6 @@ export const playGameOverSound = () => {
 };
 
 export const playMoveSound = () => {
-  moveSound.play();
+  // Swipe pe sound band (user request: awaaz bahut zyada thi)
+  // moveSound.play();
 };

@@ -96,6 +96,8 @@ function markRewardPending() {
   localStorage.setItem('reward_pending', String(Date.now()));
 }
 // Award 1000 coins when the user comes back to the app
+// Rule: ek device pe hafte me sirf EK baar (7 din cooldown)
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 function checkRewardReturn() {
   const pending = localStorage.getItem('reward_pending');
   if (!pending) return;
@@ -103,6 +105,13 @@ function checkRewardReturn() {
   // 5s se kam me wapas aaya? Abhi award mat karo, flag rakho
   if (elapsed < 5000) return;
   localStorage.removeItem('reward_pending');
+  const lastClaim = parseInt(localStorage.getItem('last_reward_claim') || '0', 10);
+  if (Date.now() - lastClaim < WEEK_MS) {
+    const daysLeft = Math.ceil((WEEK_MS - (Date.now() - lastClaim)) / 86400000);
+    toast('⏳ Channel reward ' + daysLeft + ' din baad phir milega!');
+    return;
+  }
+  localStorage.setItem('last_reward_claim', String(Date.now()));
   writeCoins(readCoins() + REWARD_COINS);
   toast('🎁 Welcome back! +' + REWARD_COINS + ' coins');
 }
@@ -207,13 +216,12 @@ document.addEventListener('click', (e) => {
   const yt = e.target.closest('#earn-youtube');
   if (yt) {
     markRewardPending();
-    window.open(YOUTUBE_URL, '_blank');
+    // real <a target="_blank"> navigation — popup blocker bypass, return detect hoga
     return;
   }
   const tg = e.target.closest('#earn-telegram');
   if (tg) {
     markRewardPending();
-    window.open(TELEGRAM_URL, '_blank');
     return;
   }
   if (e.target.closest('#earn-close')) closeEarnModal();

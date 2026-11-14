@@ -1,6 +1,7 @@
 import { BetterBoard } from "./classes/betterboard.js";
 import { Food } from "./classes/food.js";
 import { initTouch } from "./touch.js";
+import "./polish.js";
 
 let now;
 let then = Date.now();

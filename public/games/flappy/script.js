@@ -141,6 +141,8 @@ const skyImg = new Image(); skyImg.src = 'assets/sky.png';
 const landImg = new Image(); landImg.src = 'assets/land.png';
 const pipeImg = new Image(); pipeImg.src = 'assets/pipe.png';
 const birdImg2 = new Image(); birdImg2.src = 'assets/bird.png';
+// 3D bird character (AI generated, transparent PNG)
+const bird3dImg = new Image(); bird3dImg.src = 'assets/bird3d.png';
 
 function draw() {
   // sky background
@@ -221,7 +223,12 @@ function draw() {
   ctx.save();
   ctx.translate(bird.x, bird.y);
   ctx.rotate(bird.rot);
-  if (birdImg2.complete && birdImg2.naturalWidth) {
+  if (bird3dImg.complete && bird3dImg.naturalWidth) {
+    // wing flap: slight squash on the middle frame
+    const squash = birdFrame === 1 ? 0.92 : 1;
+    const bw = 46, bh = 39 * squash;
+    ctx.drawImage(bird3dImg, -bw / 2, -bh / 2, bw, bh);
+  } else if (birdImg2.complete && birdImg2.naturalWidth) {
     ctx.drawImage(birdImg2, 0, birdFrame * 32, 34, 32, -17, -16, 34, 32);
   } else if (birdImg.complete && birdImg.naturalWidth) {
     ctx.drawImage(birdImg, 0, birdFrame * 32, 34, 32, -17, -16, 34, 32);
