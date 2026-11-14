@@ -79,25 +79,55 @@ body {
 .controls {
   width: 100%;
   margin-top: 12px;
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  flex-wrap: wrap;
 }
-.dice-btn {
-  font-size: 34px; line-height: 1;
-  width: 74px; height: 74px;
-  border: none; border-radius: 22px;
-  background: linear-gradient(180deg, #fde68a, #f59e0b);
-  box-shadow: 0 6px 0 #b45309, inset 0 2px 2px rgba(255,255,255,.5);
-  cursor: pointer;
-  transition: transform .08s, box-shadow .08s;
-  flex-shrink: 0;
+
+/* Har player ka apna dice */
+.dice-tray {
+  display: flex; gap: 12px; justify-content: center; align-items: flex-end;
+  flex-wrap: wrap;
 }
-.dice-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #b45309; }
-.dice-btn:disabled { filter: grayscale(.7); opacity: .6; }
-.dice-btn.rolling { animation: shake .35s infinite; }
-@keyframes shake {
+.die-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.die-name {
+  font-size: 10px; font-weight: 900; color: #9a6b3c; letter-spacing: .5px;
+  max-width: 64px; text-align: center; line-height: 1.1;
+}
+.die {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: #fff;
+  background-size: cover;
+  box-shadow: 0 5px 0 rgba(0,0,0,.18), 0 8px 16px rgba(124,74,30,.18), inset 0 0 0 3px var(--die-col, #cbd5e1);
+  position: relative;
+  transition: transform .15s, box-shadow .15s;
+  cursor: default;
+}
+.die.can-roll { cursor: pointer; }
+.die.can-roll:active { transform: translateY(3px); }
+.die.active {
+  transform: translateY(-6px) scale(1.08);
+  box-shadow: 0 9px 0 rgba(0,0,0,.2), 0 14px 22px rgba(124,74,30,.28), inset 0 0 0 3px var(--die-col, #cbd5e1), 0 0 0 3px rgba(251,191,36,.55);
+}
+.die.rolling { animation: dieShake .4s infinite; }
+@keyframes dieShake {
   0%,100% { transform: rotate(0); }
-  25% { transform: rotate(-12deg) translateY(-2px); }
-  75% { transform: rotate(12deg) translateY(2px); }
+  25% { transform: rotate(-14deg) translateY(-3px); }
+  75% { transform: rotate(14deg) translateY(2px); }
+}
+.pip {
+  position: absolute;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #1e293b;
+  transform: translate(-50%, -50%);
+  box-shadow: inset 0 -1px 1px rgba(255,255,255,.3);
+}
+/* Fallback (agar dice image na load ho): white cube look */
+.die.noimg {
+  background: linear-gradient(145deg, #ffffff, #e2e8f0);
 }
 .dice-hint { font-size: 12px; font-weight: 800; color: #9a6b3c; line-height: 1.4; }
 
@@ -168,6 +198,6 @@ body {
 .start-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #c2410c; }
 
 @media (max-width: 380px) {
-  .dice-btn { width: 62px; height: 62px; font-size: 28px; }
+  .die { width: 46px; height: 46px; }
   .badge { font-size: 13px; }
 }

@@ -33,10 +33,42 @@
   };
   const YARD_SLOTS = [[2,2],[4,2],[2,4],[4,4]]; // yard ke andar 4 gaddhe (cell units)
 
+  // ---------- Assets (real 3D goti + dice images) ----------
+  const TOKEN_IMGS = {};
+  const DICE_BG = {}; // color -> tinted dice dataURL
+  const DICE_IMG = new Image();
+  function loadAssets() {
+    for (const c of COLORS) {
+      const im = new Image();
+      im.src = 'assets/token-' + c + '.png';
+      TOKEN_IMGS[c] = im;
+    }
+    DICE_IMG.onload = () => {
+      for (const c of COLORS) DICE_BG[c] = tintDice(c);
+      players.forEach((p) => applyDieBg(p));
+    };
+    DICE_IMG.src = 'assets/dice.png';
+  }
+  // white dice image ko player ke color me tint karo
+  function tintDice(color) {
+    try {
+      const c = document.createElement('canvas');
+      c.width = DICE_IMG.naturalWidth; c.height = DICE_IMG.naturalHeight;
+      const x = c.getContext('2d');
+      x.drawImage(DICE_IMG, 0, 0);
+      x.globalCompositeOperation = 'multiply';
+      x.fillStyle = COL[color].main;
+      x.fillRect(0, 0, c.width, c.height);
+      x.globalCompositeOperation = 'destination-in';
+      x.drawImage(DICE_IMG, 0, 0);
+      return c.toDataURL('image/png');
+    } catch (e) { return null; }
+  }
+
   // ---------- DOM ----------
   const canvas = document.getElementById('board');
   const ctx = canvas.getContext('2d');
-  const diceBtn = document.getElementById('dice-btn');
+  const diceTray = document.getElementById('dice-tray');
   const diceHint = document.getElementById('dice-hint');
   const turnEl = document.getElementById('turn');
   const progEl = document.getElementById('prog');
@@ -97,17 +129,78 @@
     turnIdx = 0; dice = 0; sixStreak = 0; movable = []; state = 'roll';
     overlay.classList.add('hidden');
     startBtn.classList.add('hidden');
-    diceBtn.textContent = '🎲';
+    buildTray();
     render();
     beginTurn();
+  }
+
+  // ---------- Dice tray (har player ka apna dice) ----------
+  function buildTray() {
+    diceTray.innerHTML = '';
+    players.forEach((p, idx) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'die-wrap';
+      const die = document.createElement('div');
+      die.className = 'die noimg';
+      die.dataset.idx = idx;
+      die.style.setProperty('--die-col', COL[p.color].main);
+      applyDieBg(p, die);
+      const name = document.createElement('div');
+      name.className = 'die-name';
+      name.textContent = (p.isBot ? '🤖 ' : '🧑 ') + p.name;
+      wrap.appendChild(die);
+      wrap.appendChild(name);
+      diceTray.appendChild(wrap);
+      p._dieEl = die;
+    });
+    refreshTray();
+  }
+  function applyDieBg(p, dieEl) {
+    const die = dieEl || p._dieEl;
+    if (!die) return;
+    const bg = DICE_BG[p.color];
+    if (bg) {
+      die.style.backgroundImage = `url(${bg})`;
+      die.classList.remove('noimg');
+    } else {
+      die.style.backgroundImage = '';
+      die.classList.add('noimg');
+    }
+  }
+  function refreshTray() {
+    players.forEach((p, idx) => {
+      const die = p._dieEl;
+      if (!die) return;
+      die.classList.toggle('active', idx === turnIdx && state !== 'menu' && state !== 'over');
+      die.classList.toggle('can-roll', idx === turnIdx && !p.isBot && state === 'roll');
+    });
+  }
+  function setFace(die, n) {
+    die.querySelectorAll('.pip').forEach((e) => e.remove());
+    if (!n) return;
+    const P = {
+      1: [[50, 50]],
+      2: [[27, 27], [73, 73]],
+      3: [[27, 27], [50, 50], [73, 73]],
+      4: [[27, 27], [73, 27], [27, 73], [73, 73]],
+      5: [[27, 27], [73, 27], [50, 50], [27, 73], [73, 73]],
+      6: [[27, 25], [73, 25], [27, 50], [73, 50], [27, 75], [73, 75]],
+    };
+    for (const [x, y] of P[n]) {
+      const d = document.createElement('span');
+      d.className = 'pip';
+      d.style.left = x + '%';
+      d.style.top = y + '%';
+      die.appendChild(d);
+    }
   }
 
   function beginTurn() {
     state = 'roll';
     const p = players[turnIdx];
     turnEl.textContent = (p.isBot ? '🤖 ' : '🧑 ') + p.name;
-    diceHint.textContent = p.isBot ? p.name + ' roll kar raha hai...' : 'Dice dabaao!';
-    diceBtn.disabled = p.isBot;
+    diceHint.textContent = p.isBot ? p.name + ' apna dice roll kar raha hai...' : 'Apna dice dabaao!';
+    refreshTray();
     render();
     if (p.isBot) later(botRoll, 700);
   }
@@ -115,20 +208,20 @@
   // ---------- Dice ----------
   function rollDiceAnim(done) {
     state = 'anim';
-    diceBtn.classList.add('rolling');
-    const faces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+    const die = players[turnIdx]._dieEl;
+    die.classList.add('rolling');
     let n = 0;
     const iv = setInterval(() => {
-      diceBtn.textContent = faces[Math.floor(Math.random() * 6)];
-      if (++n >= 7) {
+      setFace(die, 1 + Math.floor(Math.random() * 6));
+      if (++n >= 8) {
         clearInterval(iv);
-        diceBtn.classList.remove('rolling');
+        die.classList.remove('rolling');
         dice = 1 + Math.floor(Math.random() * 6);
-        diceBtn.textContent = faces[dice - 1];
+        setFace(die, dice);
         sndRoll();
         done();
       }
-    }, 80);
+    }, 75);
   }
 
   function afterRoll() {
@@ -164,8 +257,8 @@
     const p = players[turnIdx];
     if (p.isBot) { later(botRoll, 500); return; }
     state = 'roll';
-    diceBtn.disabled = false;
-    diceHint.textContent = 'Extra roll! 🎲';
+    diceHint.textContent = 'Extra turn — dice dobara dabao! 🎲';
+    refreshTray();
   }
 
   function botRoll() { rollDiceAnim(afterRoll); }
@@ -187,7 +280,7 @@
   function doMove(tokIdx) {
     if (state === 'anim' || state === 'over' || state === 'menu') return; // double-fire guard
     state = 'anim';
-    diceBtn.disabled = true;
+    refreshTray();
     const p = players[turnIdx];
     const from = p.tokens[tokIdx];
     let target;
@@ -482,28 +575,44 @@
   function emojiOf(c) { return { red: '🔴', green: '🟢', yellow: '🟡', blue: '🔵' }[c]; }
 
   function drawToken(x, y, p, i, stack) {
+    const img = TOKEN_IMGS[p.color];
+    const loaded = img && img.complete && img.naturalWidth > 0;
     ctx.save();
+    // ground shadow
     ctx.beginPath();
-    ctx.arc(x, y - 2, 11, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,0,0,.18)';
-    ctx.fill(); // shadow
-    ctx.beginPath();
-    ctx.arc(x, y - 3, 11, 0, Math.PI * 2);
-    ctx.fillStyle = COL[p.color].main;
+    ctx.ellipse(x, y + 8, 9, 3.5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,.22)';
     ctx.fill();
-    ctx.strokeStyle = COL[p.color].dark;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    // shine
-    ctx.beginPath();
-    ctx.arc(x - 3.5, y - 6.5, 3.2, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,.75)';
-    ctx.fill();
+    if (loaded) {
+      const s = p.tokens[i] === 56 ? 0.62 : 1; // ghar pahunchi goti chhoti
+      const w = 26 * s, h = 32 * s;
+      ctx.drawImage(img, x - w / 2, y + 8 - h, w, h);
+    } else {
+      // fallback: circle token
+      ctx.beginPath();
+      ctx.arc(x, y - 3, 11, 0, Math.PI * 2);
+      ctx.fillStyle = COL[p.color].main;
+      ctx.fill();
+      ctx.strokeStyle = COL[p.color].dark;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - 3.5, y - 6.5, 3.2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,.75)';
+      ctx.fill();
+    }
     if (stack > 1 && p.tokens[i] !== -1 && p.tokens[i] !== 56) {
+      ctx.beginPath();
+      ctx.arc(x + 10, y - 12, 7.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#1e293b';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
       ctx.fillStyle = '#fff';
       ctx.font = '900 9px Nunito Sans';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('×' + stack, x, y + 5);
+      ctx.fillText(stack, x + 10, y - 11);
     }
     ctx.restore();
   }
@@ -534,6 +643,7 @@
     overlay.classList.remove('hidden');
     startBtn.classList.remove('hidden');
     diceHint.textContent = 'Khel khatam!';
+    refreshTray();
   }
 
   // ---------- Menu wiring ----------
@@ -550,13 +660,17 @@
     startGame(isVs ? 'vsbot' : 'pass', isVs ? undefined : (n === 2 && players[0].color === 'red' && players[1].color === 'yellow' ? 2 : n));
   });
 
-  // dice button
-  diceBtn.addEventListener('click', () => {
-    if (state !== 'roll' || diceBtn.disabled) return;
-    diceBtn.disabled = true;
+  // apna dice dabaao -> roll
+  diceTray.addEventListener('click', (e) => {
+    const die = e.target.closest('.die');
+    if (!die) return;
+    const idx = parseInt(die.dataset.idx, 10);
+    if (state !== 'roll' || idx !== turnIdx) return;
+    if (players[idx].isBot) return;
     rollDiceAnim(afterRoll);
   });
 
+  loadAssets();
   render();
   // debug hook (testing)
   window.__ludo = () => ({ state, dice, turnIdx, movable, players: players.map((p) => ({ color: p.color, isBot: p.isBot, tokens: p.tokens.slice(), done: p.done })) });
