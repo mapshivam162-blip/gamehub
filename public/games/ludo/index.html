@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#fef3e2"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Ludo 🎲 — Khelog</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+
+<div class="wrap">
+  <div class="cabinet">
+    <div class="badge">🎲 LUDO CHAMPION</div>
+    <div class="hud">
+      <div class="hud-card turn-card"><span class="hud-label">TURN</span><span class="hud-val" id="turn">—</span></div>
+      <div class="hud-card"><span class="hud-label">HOME</span><span class="hud-val" id="prog">🔴0 🟢0 🟡0 🔵0</span></div>
+    </div>
+    <div class="game-area">
+      <canvas id="board" width="470" height="470"></canvas>
+    </div>
+    <div class="controls">
+      <button class="dice-btn" id="dice-btn">🎲</button>
+      <div class="dice-hint" id="dice-hint">Mode chuno → Roll karo!</div>
+    </div>
+    <div id="overlay" class="overlay">
+      <div class="overlay-card">
+        <div class="overlay-icon">🎲</div>
+        <h2>Ludo</h2>
+        <p id="ov-sub">Mode chuno aur khelna shuru karo!</p>
+        <div id="mode-select">
+          <button id="btn-vsbot" class="mode-btn bot">🤖 Vs Bot<br><small>Tum + 3 Bots</small></button>
+          <button id="btn-passplay" class="mode-btn pass">👥 Pass &amp; Play<br><small>2-4 dost ek phone pe</small></button>
+          <div id="pp-count" class="pp-count hidden">
+            <span class="pp-label">Kitne players?</span>
+            <div class="pp-btns">
+              <button data-n="2">2</button>
+              <button data-n="3">3</button>
+              <button data-n="4">4</button>
+            </div>
+          </div>
+        </div>
+        <button id="start-btn" class="start-btn hidden">▶ Play Again</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js?v=1"></script>
+</body></html>

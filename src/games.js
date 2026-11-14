@@ -173,4 +173,16 @@ export const games = [
     tile: '#4a2407',
     heat: 2,
   },
+  {
+    id: 'ludo',
+    title: 'Ludo',
+    emoji: '🎲',
+    desc: 'Classic Ludo! Bot se khelo ya 2-4 dost ek phone pe.',
+    status: 'ready',
+    img: 'games/ludo/assets/logo.jpg',
+    players: 4,
+    grad: 'from-rose-500 to-red-700',
+    tile: '#4a0f16',
+    heat: 3,
+  },
 ];
