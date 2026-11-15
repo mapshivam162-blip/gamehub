@@ -174,6 +174,17 @@ export const games = [
     heat: 2,
   },
   {
+    id: 'pixelquest',
+    title: 'Pixel Quest',
+    emoji: '🍄',
+    desc: 'Retro 8-bit platformer! Dushman pe jump maro, gems loot-o!',
+    status: 'ready',
+    players: 1,
+    grad: 'from-red-500 to-emerald-600',
+    tile: '#143a24',
+    heat: 3,
+  },
+  {
     id: 'ludo',
     title: 'Ludo',
     emoji: '🎲',
