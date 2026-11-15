@@ -63,6 +63,27 @@ canvas {
   width: 100%; display: block; border: 6px solid #92400e; border-radius: 14px;
   background: #c68642; cursor: pointer; touch-action: none;
 }
+/* Striker slider cursor (Carrom Pool jaisa) */
+.striker-slider {
+  display: none; width: 100%; margin-top: 10px; height: 30px;
+  -webkit-appearance: none; appearance: none; background: transparent;
+}
+.striker-slider::-webkit-slider-runnable-track {
+  height: 8px; border-radius: 4px; background: linear-gradient(180deg, #8a5a2b, #6b4420);
+  border: 1px solid #5d2e0d;
+}
+.striker-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+  background: #f8fafc; border: 3.5px solid #475569; margin-top: -10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.45);
+}
+.striker-slider::-moz-range-track {
+  height: 8px; border-radius: 4px; background: #8a5a2b;
+}
+.striker-slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #f8fafc; border: 3.5px solid #475569;
+}
 .hint {
   text-align: center; margin-top: 8px; padding: 8px; border-radius: 12px;
   background: #fff2e2; border: 2px solid #fff; color: #5a3615;

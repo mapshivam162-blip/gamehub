@@ -30,7 +30,6 @@
   var myTurn = true;
   var coins = [];     // { x, y, vx, vy, type: 'w'|'b'|'q', active }
   var striker = { x: W / 2, y: H - M - 14, vx: 0, vy: 0 };
-  var aim = null;     // { dx, dy } drag vector
   var potCounts = { me: 0, bot: 0 };
   var queen = { onBoard: true, owner: null };
   var foulQueue = []; // coins to return
@@ -77,9 +76,11 @@
     shotInfo = null;
     if (myTurn) {
       state = 'aim';
-      msg('🔴 Striker ko NEECHE kheencho, chhodo — upar marega!');
+      msg('🎯 Slider se striker rakho, phir kahin bhi PULL karke chhodo — line dikhegi!');
+      showSlider(true);
     } else {
       state = 'settling';
+      showSlider(false);
       msg('🤖 Bot soch raha hai...');
       setTimeout(botShoot, 900);
     }
@@ -197,8 +198,11 @@
     playPot();
   }
 
-  // ===== Player aiming (slingshot) =====
-  var dragging = false, dragStart = null;
+  // ===== Player controls (Carrom Pool style: slider cursor + pull-aim) =====
+  var touchMode = null;      // 'slide' | 'pull'
+  var pullStart = null;
+  var aimDir = null, aimPower = 0;
+  var sliderEl = document.getElementById('striker-slider');
 
   function canvasPos(e) {
     var rect = canvas.getBoundingClientRect();
@@ -209,45 +213,72 @@
     };
   }
 
+  function showSlider(v) {
+    if (sliderEl) sliderEl.style.display = v ? 'block' : 'none';
+  }
+
   function onDown(e) {
     if (state !== 'aim' || !myTurn) return;
     var p = canvasPos(e);
-    if (Math.hypot(p.x - striker.x, p.y - striker.y) < 48) {
-      dragging = true;
-      dragStart = p;
+    if (Math.hypot(p.x - striker.x, p.y - striker.y) < SR + 20) {
+      touchMode = 'slide'; // striker pakda — idhar-udhar karo
+    } else {
+      touchMode = 'pull';  // kahin bhi drag — aim set karo
+      pullStart = p;
+      aimDir = null; aimPower = 0;
     }
   }
   function onMove(e) {
-    if (!dragging) return;
+    if (!touchMode) return;
     e.preventDefault();
     var p = canvasPos(e);
-    aim = { dx: p.x - striker.x, dy: p.y - striker.y };
-    // striker ko baseline pe slide karo (aim direction ke hisaab se)
-    var maxSlide = W / 2 - M - SR;
-    var slide = Math.max(-maxSlide, Math.min(maxSlide, aim.dx * 0.6));
-    striker.x = W / 2 + slide;
+    if (touchMode === 'slide') {
+      var maxSlide = W / 2 - M - SR;
+      striker.x = Math.max(W / 2 - maxSlide, Math.min(W / 2 + maxSlide, p.x));
+      if (sliderEl) sliderEl.value = String(Math.round(((striker.x - (M + SR)) / (W - 2 * (M + SR))) * 1000));
+    } else {
+      var dx = p.x - pullStart.x, dy = p.y - pullStart.y;
+      var len = Math.hypot(dx, dy);
+      if (len > 8) {
+        // jis taraf pull, ulti taraf shot (aim line dikhti hai)
+        aimDir = { x: -dx / len, y: -dy / len };
+        aimPower = Math.min(len, 160);
+      }
+    }
   }
   function onUp(e) {
-    if (!dragging) return;
-    dragging = false;
-    if (!aim) return;
-    var power = Math.hypot(aim.dx, aim.dy);
-    if (power < 18) { aim = null; return; } // tap — cancel
-    var powerCap = Math.min(power, 160);
-    var speed = powerCap * 0.62;
-    // True slingshot: jis taraf se kheencha, ulti taraf marega
-    var ang = Math.atan2(-aim.dy, -aim.dx);
-    striker.vx = Math.cos(ang) * speed;
-    striker.vy = Math.sin(ang) * speed;
-    aim = null;
-    state = 'shot';
-    shotInfo = { pottedMine: 0, pottedBot: 0, strikerFell: false };
-    playStrike();
+    if (!touchMode) return;
+    var m = touchMode;
+    touchMode = null;
+    if (m === 'pull' && aimDir && aimPower > 18) {
+      if (aimDir.y > -0.08) {
+        aimDir = null; aimPower = 0;
+        msg('⚠️ Upar ki taraf aim karo!');
+        return;
+      }
+      var speed = aimPower * 0.62;
+      striker.vx = aimDir.x * speed;
+      striker.vy = aimDir.y * speed;
+      aimDir = null; aimPower = 0;
+      state = 'shot';
+      shotInfo = { mine: 0, others: 0, strikerFell: false };
+      playStrike();
+      showSlider(false);
+    } else {
+      aimDir = null; aimPower = 0;
+    }
   }
   canvas.addEventListener('pointerdown', onDown);
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerup', onUp);
-  canvas.addEventListener('pointercancel', function () { dragging = false; });
+  canvas.addEventListener('pointercancel', function () { touchMode = null; aimDir = null; aimPower = 0; });
+  if (sliderEl) {
+    sliderEl.addEventListener('input', function () {
+      if (state !== 'aim' || !myTurn) return;
+      var t = parseInt(sliderEl.value, 10) / 1000;
+      striker.x = (M + SR) + t * (W - 2 * (M + SR));
+    });
+  }
 
   // ===== Bot AI =====
   function botShoot() {
@@ -475,20 +506,26 @@
       ctx.stroke();
     }
 
-    // aim guide
-    if (dragging && aim) {
-      var ang = Math.atan2(aim.dy, aim.dx);
-      var len = Math.min(Math.hypot(aim.dx, aim.dy), 160) * 1.4;
-      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    // aim guide (pull-to-aim, Carrom Pool jaisa)
+    if (touchMode === 'pull' && aimDir) {
+      var alen = 40 + aimPower * 1.1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)';
       ctx.lineWidth = 3;
-      ctx.setLineDash([10, 7]);
+      ctx.setLineDash([9, 7]);
       ctx.beginPath();
       ctx.moveTo(striker.x, striker.y);
-      ctx.lineTo(striker.x + Math.cos(ang) * len, striker.y + Math.sin(ang) * len);
+      ctx.lineTo(striker.x + aimDir.x * alen, striker.y + aimDir.y * alen);
       ctx.stroke();
       ctx.setLineDash([]);
+      // direction dots
+      for (var di = 1; di <= 3; di++) {
+        ctx.beginPath();
+        ctx.arc(striker.x + aimDir.x * alen * di / 3, striker.y + aimDir.y * alen * di / 3, 2.4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.fill();
+      }
       // power meter
-      var pw = Math.min(Math.hypot(aim.dx, aim.dy), 160) / 160;
+      var pw = aimPower / 160;
       ctx.fillStyle = 'rgba(0,0,0,0.4)';
       ctx.fillRect(10, H - 26, 100, 12);
       ctx.fillStyle = pw > 0.75 ? '#ef4444' : pw > 0.4 ? '#eab308' : '#4ade80';

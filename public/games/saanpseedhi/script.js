@@ -175,19 +175,17 @@
     if (n <= 0) { // start ke bahar — board ke neeche
       return null;
     }
-    const rc = cellRC(n);
-    // cell ka pixel offset
+    // offset-based: border distortion nahi hota, token box ke bilkul center me
+    // token 6.5%, cell 10% → center offset = (10 - 6.5) / 2 = 1.75
     const cell = cells[n];
-    const boardRect = boardEl.getBoundingClientRect();
-    const cellRect = cell.getBoundingClientRect();
     return {
-      left: ((cellRect.left - boardRect.left) / boardRect.width) * 100 + 3.5,
-      top: ((cellRect.top - boardRect.top) / boardRect.height) * 100 + 3.5,
+      left: (cell.offsetLeft / boardEl.clientWidth) * 100 + 1.75,
+      top: (cell.offsetTop / boardEl.clientHeight) * 100 + 1.75,
     };
   }
   function stagger(i) {
-    // 4 token ek cell pe thoda alag alag
-    const offs = [[-4, -4], [4, -4], [-4, 4], [4, 4]];
+    // 4 token ek cell pe chhota sa spread (box ke andar hi rahe)
+    const offs = [[-1.7, -1.7], [1.7, -1.7], [-1.7, 1.7], [1.7, 1.7]];
     return offs[i % 4];
   }
   function placeToken(i, animate) {
@@ -202,7 +200,9 @@
       };
     } else {
       const base = posOf(Math.min(p.pos, WIN));
-      const off = stagger(i);
+      // agar is cell pe akela token hai to bilkul center, warna stagger
+      const shared = players.filter(function (q) { return q.pos === p.pos; }).length;
+      const off = shared <= 1 ? [0, 0] : stagger(i);
       target = { left: base.left + off[0] * 0.6, top: base.top + off[1] * 0.6 };
     }
     if (!animate) el.style.transition = 'none';
@@ -228,12 +228,20 @@
   document.getElementById('mode-1p').addEventListener('click', function () {
     mode = '1p';
     this.classList.add('active');
+    document.getElementById('mode-4p').classList.remove('active');
+    document.getElementById('mode-2p').classList.remove('active');
+  });
+  document.getElementById('mode-4p').addEventListener('click', function () {
+    mode = '4p';
+    this.classList.add('active');
+    document.getElementById('mode-1p').classList.remove('active');
     document.getElementById('mode-2p').classList.remove('active');
   });
   document.getElementById('mode-2p').addEventListener('click', function () {
     mode = '2p';
     this.classList.add('active');
     document.getElementById('mode-1p').classList.remove('active');
+    document.getElementById('mode-4p').classList.remove('active');
   });
 
   document.getElementById('start-btn').addEventListener('click', startGame);
@@ -250,8 +258,12 @@
   function startGame() {
     players = [];
     if (mode === '1p') {
-      players.push({ pos: 0, color: COLORS[0].c, name: COLORS[0].name, isHuman: true });
-      for (let i = 1; i < 4; i++) players.push({ pos: 0, color: COLORS[i].c, name: COLORS[i].name, isHuman: false });
+      players.push({ pos: 0, color: COLORS[0].c, name: 'Tum', isHuman: true });
+      for (let i = 1; i < 4; i++) players.push({ pos: 0, color: COLORS[i].c, name: 'Bot ' + i, isHuman: false });
+    } else if (mode === '4p') {
+      // 4 dosto wala pass & play — har bande ka apna dice, apni baari pe dabao
+      const pnames = ['P1 🔴', 'P2 🔵', 'P3 🟢', 'P4 🟡'];
+      for (let i = 0; i < 4; i++) players.push({ pos: 0, color: COLORS[i].c, name: pnames[i], isHuman: true });
     } else {
       players.push({ pos: 0, color: COLORS[1].c, name: 'Bot 🔵', isHuman: false });
       players.push({ pos: 0, color: COLORS[2].c, name: 'Bot 🟢', isHuman: false });
@@ -279,7 +291,16 @@
 
   function updateTurnBar() {
     const p = players[turn];
-    turnBar.textContent = p.isHuman ? '🎲 Tumhari baari — dice dabao!' : '⏳ ' + p.name + ' chal raha hai...';
+    if (p.isHuman) {
+      turnBar.textContent = '🎲 ' + p.name + ' ki baari — apna dice dabao!';
+      // dice ko current player ke color me highlight karo
+      diceBtn.style.background = 'linear-gradient(180deg, ' + p.color + ', ' + p.color + 'cc)';
+      diceBtn.style.boxShadow = '0 4px 0 ' + p.color + '77';
+    } else {
+      turnBar.textContent = '⏳ ' + p.name + ' chal raha hai...';
+      diceBtn.style.background = '';
+      diceBtn.style.boxShadow = '';
+    }
   }
 
   // ===== Dice =====
@@ -392,7 +413,7 @@
       } catch (e) { /* ignore */ }
     }
     document.getElementById('result-emoji').textContent = winner.isHuman ? '🎉' : '🤖';
-    document.getElementById('result-title').textContent = winner.isHuman ? 'Tum Jeet Gaye!' : winner.name + ' Jeet Gaya';
+    document.getElementById('result-title').textContent = winner.name + ' Jeet Gaya!';
     document.getElementById('result-sub').innerHTML = '🏁 Pahunch gaya ' + winner.name + '!' + note;
     setTimeout(function () {
       resultModal.classList.add('show');

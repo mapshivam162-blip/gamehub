@@ -19,11 +19,11 @@
       <h1 class="title">Carrom</h1>
 
       <div id="setup" class="card">
-        <h3>Striker ko neeche kheench ke chhodo — ulta marega!</h3>
+        <h3>Real carrom wala control — slider + aim line!</h3>
         <ul class="howto">
-          <li>Striker ko NEECHE drag karo, chhodo — upar udega 🎯</li>
-          <li>Apni goti (🔴) maar ke pot karo</li>
-          <li>Goti potted = turn chalta rahega</li>
+          <li>Slider (cursor) se striker idhar-udhar karo ↔️</li>
+          <li>Board pe kahin bhi PULL karo — aim line dikhegi</li>
+          <li>Chhodo = shot! Jitna lamba pull, utni power 💪</li>
           <li>Striker giri = foul, ek goti wapas!</li>
         </ul>
         <button id="start-btn" class="big-btn">🎯 Khel Shuru</button>
@@ -36,6 +36,7 @@
           <span id="bot-info">🤖 Bot: 0</span>
         </div>
         <canvas id="gameCanvas" width="420" height="420"></canvas>
+        <input id="striker-slider" class="striker-slider" type="range" min="0" max="1000" value="500" aria-label="Striker position slider"/>
         <div id="msg" class="hint">🔴 Apni goti chuno aur striker aim karo!</div>
       </div>
 
