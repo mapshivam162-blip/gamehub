@@ -314,19 +314,20 @@ var camX = 0;
 var clouds = [];
 var tick = 0;
 var input = { left: false, right: false, up: false, down: false, jump: false, attack: false };
-var jumpPressed = false, atkPressed = false;
+var jumpPressed = false, atkPressed = false, atkHeld = false;
 
 // ================= INPUT =================
 function bindBtn(id, key) {
   var el = document.getElementById(id);
-  function on(e) { e.preventDefault(); input[key] = true; el.classList.add('active'); audio(); }
-  function off(e) { if (e) e.preventDefault(); input[key] = false; el.classList.remove('active'); }
+  function on(e) { e.preventDefault(); input[key] = true; if (key === 'jump') jumpPressed = true; if (key === 'attack') atkPressed = true; window.__pdSeen = window.__pdSeen || {}; window.__pdSeen[el.id] = (window.__pdSeen[el.id] || 0) + 1; el.classList.add('active'); audio(); }
+  function off(e) { if (e && e.preventDefault) e.preventDefault(); input[key] = false; el.classList.remove('active'); }
+  // NOTE: pointerleave use nahi karte — mobile pe finger thoda hilne pe input cancel ho jata tha
   el.addEventListener('pointerdown', on);
   el.addEventListener('pointerup', off);
   el.addEventListener('pointercancel', off);
-  el.addEventListener('pointerleave', off);
   el.addEventListener('touchstart', function (e) { e.preventDefault(); on(e); }, { passive: false });
   el.addEventListener('touchend', function (e) { e.preventDefault(); off(e); }, { passive: false });
+  el.addEventListener('touchcancel', function (e) { e.preventDefault(); off(e); }, { passive: false });
 }
 bindBtn('d-left', 'left'); bindBtn('d-right', 'right');
 bindBtn('d-up', 'up'); bindBtn('d-down', 'down');
@@ -584,14 +585,16 @@ function update(dt) {
   P.vy += 0.36;
   P.vy = Math.min(P.vy, 12);
 
-  // attack
+  // attack (edge-detect input.attack se — touch + keyboard dono ke liye robust)
   P.atkCd -= dt;
-  if (atkPressed && P.atkCd <= 0 && fireballs.length < 2) {
+  if (input.attack) window.__atkSeen = (window.__atkSeen || 0) + 1;
+  if (input.attack && !atkHeld && P.atkCd <= 0 && fireballs.length < 2) {
     P.atkCd = 0.45;
     fireballs.push({ x: P.x + (P.face > 0 ? P.w : -10), y: P.y + 8, vx: P.face * 5.2, vy: 1, w: 10, h: 10, life: 2.2 });
+    window.__fbSpawned = (window.__fbSpawned || 0) + 1;
     SFX.fire();
   }
-  atkPressed = false;
+  atkHeld = input.attack;
 
   // move & collide
   var wasAir = !P.grounded;
@@ -1038,6 +1041,10 @@ window.__PQ = function () {
     checks: checksHit, time: Math.ceil(timeLeft),
     px: Math.round(P.x), py: Math.round(P.y), grounded: P.grounded,
     enemies: enemies.filter(function (e) { return !e.dead; }).length,
+    fbs: fireballs.length,
+    pd: window.__pdSeen || null,
+    atkSeen: window.__atkSeen || 0,
+    fbT: window.__fbSpawned || 0,
     errs: window.__pqErr || null
   };
 };
