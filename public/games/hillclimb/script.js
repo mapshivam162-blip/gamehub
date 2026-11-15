@@ -297,7 +297,9 @@
 
   // --- Terrain Generator ---
   function getTerrainHeight(x) {
-    if (x < 0) return 320;
+    if (x < 0) return 330;
+    // Flat start zone: pehle 260px bilkul samtal — gaadi spawn pe atakti nahi
+    if (x < 260) return 330;
     // Layered sine curves that get steeper further out
     const difficulty = 1 + Math.min(x / 4000, 1.8);
     const hill1 = Math.sin(x * 0.003) * 65 * difficulty;
@@ -451,8 +453,9 @@
   function startGame() {
     initAudio();
     applyVehicle();
+    // Dono wheels ground pe spawn karo (wheel bottom = y + 12 + wheelRadius)
     car.x = 80;
-    car.y = getTerrainHeight(80) - 40;
+    car.y = getTerrainHeight(80) - 12 - car.wheelRadius;
     car.vx = 0;
     car.vy = 0;
     car.angle = 0;
@@ -472,6 +475,22 @@
     startOverlay.classList.remove('active');
     gameoverOverlay.classList.remove('active');
     garageModal.classList.remove('active');
+  }
+
+  // Debug hook (browser console/testing ke liye)
+  if (typeof window !== 'undefined') {
+    window.__HC_DEBUG = function () {
+      return {
+        input: { gas: !!input.gas, brake: !!input.brake },
+        x: Math.round(car.x), y: Math.round(car.y),
+        vx: +car.vx.toFixed(2), vy: +car.vy.toFixed(2),
+        angle: +car.angle.toFixed(2),
+        grounded: [!!car.rearGrounded, !!car.frontGrounded],
+        fuel: Math.round(fuel),
+        playing: isPlaying, over: isGameOver,
+        engine: gameData.upgrades.engine
+      };
+    };
   }
 
   function triggerGameOver(reason) {
@@ -564,7 +583,8 @@
     if (!isPlaying) return;
 
     // Upgrades modifiers
-    const enginePower = (0.38 + gameData.upgrades.engine * 0.055) * ((VEHICLES[gameData.vehicle] || VEHICLES.jeep).powerMul || 1);
+    // Engine base strong: Level-1 pe hi gaadi pehli chadhai climb kar le
+    const enginePower = (0.46 + gameData.upgrades.engine * 0.05) * ((VEHICLES[gameData.vehicle] || VEHICLES.jeep).powerMul || 1);
     const suspStiffness = 0.18 + gameData.upgrades.suspension * 0.02;
     const tireGrip = 0.88 + gameData.upgrades.tires * 0.02;
     const is4WD = gameData.upgrades.fourwd > 1;
@@ -622,11 +642,13 @@
 
       // 4WD Traction on slope
       const fSlope = getTerrainAngle(fwx);
-      if (input.gas && is4WD && fuel > 0) {
-        const drive = enginePower * 0.7 * tireGrip * 1.25;
-        car.vx += Math.cos(fSlope) * drive;
-        car.vy += Math.sin(fSlope) * drive;
-        addDirt(fwx, fGround, -Math.cos(fSlope) * 3, -2);
+      if (input.gas && fuel > 0) {
+        // Anti-stuck: 4WD nahi ho to bhi front wheel se halka drive milta hai
+        // (warna rear wheel hawa me ho to gaadi hamesha ke liye atak jaati thi)
+        const fDrive = enginePower * (is4WD ? 0.7 : 0.3) * tireGrip * 1.25;
+        car.vx += Math.cos(fSlope) * fDrive;
+        car.vy += Math.sin(fSlope) * fDrive;
+        if (is4WD) addDirt(fwx, fGround, -Math.cos(fSlope) * 3, -2);
       }
       if (input.brake) {
         car.vx *= 0.92;

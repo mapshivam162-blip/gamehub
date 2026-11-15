@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Saanp Seedhi 🪜 — Khelog</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+
+<div class="wrap">
+  <section class="screen active">
+    <div class="cabinet">
+      <div class="badge">🪜 SAANP SEEDHI</div>
+      <h1 class="title">Saanp Seedhi</h1>
+
+      <!-- Setup -->
+      <div id="setup" class="card">
+        <h3>Tum akela kheloge ya bot ke saath?</h3>
+        <div class="mode-row">
+          <button id="mode-1p" class="mode-btn active">👤 Tum vs 3 Bot</button>
+          <button id="mode-2p" class="mode-btn">👥 2 Bots duel</button>
+        </div>
+        <button id="start-btn" class="big-btn">🎮 Khel Shuru</button>
+      </div>
+
+      <!-- Game -->
+      <div id="game" style="display:none">
+        <div class="turn-bar" id="turn-bar">Tumhari baari</div>
+        <div id="board" class="board"></div>
+        <div class="bottom-row">
+          <div class="dice-area">
+            <button id="dice" class="dice">🎲</button>
+          </div>
+          <div id="players" class="players"></div>
+        </div>
+      </div>
+
+      <!-- Result modal -->
+      <div id="result-modal" class="modal">
+        <div class="modal-box">
+          <div id="result-emoji" class="modal-emoji">🎉</div>
+          <h2 id="result-title" class="modal-title">Jeet!</h2>
+          <p id="result-sub" class="modal-sub"></p>
+          <button id="again-btn" class="big-btn">🔄 Phir Se Khelo</button>
+          <button id="menu-btn" class="small-btn">← Menu</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
