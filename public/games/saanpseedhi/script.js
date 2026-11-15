@@ -52,20 +52,123 @@
         boardEl.appendChild(d);
       }
     }
-    // Saanp / seedhi markers
+    // Saanp / seedhi cell tints (art SVG me proper design draw hoga)
     Object.keys(LADDERS).forEach(function (from) {
       cells[from].classList.add('ladder-base');
-      cells[from].insertAdjacentHTML('beforeend', '<span class="mark">🪜</span>');
       cells[LADDERS[from]].classList.add('ladder-top');
     });
     Object.keys(SNAKES).forEach(function (from) {
       cells[from].classList.add('snake-head');
-      cells[from].insertAdjacentHTML('beforeend', '<span class="mark">🐍</span>');
       cells[SNAKES[from]].classList.add('snake-tail');
     });
     cells[WIN].insertAdjacentHTML('beforeend', '<span class="mark">🏁</span>');
+    buildArt();
   }
 
+  // ===== Real snake + ladder art (Snake game wala look) =====
+  // Snake game colors: head #66ff8f -> #0eb85c, body rgba(46,224,120)->rgba(11,140,70)
+  function cellCenter(n) {
+    const rc = cellRC(n);
+    const visRow = 9 - rc.row; // board DOM me row 9 sabse upar
+    return { x: (rc.col + 0.5) * 10, y: (visRow + 0.5) * 10 };
+  }
+
+  function buildArt() {
+    let svg = document.getElementById('art');
+    if (!svg) {
+      svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.id = 'art';
+      svg.setAttribute('viewBox', '0 0 100 100');
+      svg.setAttribute('preserveAspectRatio', 'none');
+      boardEl.appendChild(svg);
+    }
+    svg.innerHTML = '';
+    let defs = '';
+    let body = '';
+    let gi = 0;
+    // --- Seedhi (proper rails + rungs) ---
+    Object.keys(LADDERS).forEach(function (from) {
+      const a = cellCenter(parseInt(from, 10));
+      const b = cellCenter(LADDERS[from]);
+      // seedhi ko base se thoda neeche aur top se thoda upar extend karo (real look)
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const L = Math.hypot(dx, dy) || 1;
+      const ux = dx / L, uy = dy / L;      // along ladder
+      const px = -uy, py = ux;             // perpendicular
+      const railOff = 1.5, ext = 1.2;
+      const ax = a.x - ux * ext, ay = a.y - uy * ext;
+      const bx = b.x + ux * ext, by = b.y + uy * ext;
+      body += '<g opacity="0.96">';
+      // shadow
+      body += '<line x1="' + (ax + 0.4) + '" y1="' + (ay + 0.5) + '" x2="' + (bx + 0.4) + '" y2="' + (by + 0.5) + '" stroke="rgba(0,0,0,0.18)" stroke-width="3.4" stroke-linecap="round"/>';
+      // rails (wood)
+      body += '<line x1="' + (ax + px * railOff) + '" y1="' + (ay + py * railOff) + '" x2="' + (bx + px * railOff) + '" y2="' + (by + py * railOff) + '" stroke="#a06a35" stroke-width="1.15" stroke-linecap="round"/>';
+      body += '<line x1="' + (ax - px * railOff) + '" y1="' + (ay - py * railOff) + '" x2="' + (bx - px * railOff) + '" y2="' + (by - py * railOff) + '" stroke="#a06a35" stroke-width="1.15" stroke-linecap="round"/>';
+      // rungs har ~3 unit pe
+      const step = 2.6;
+      for (let t = 0.9; t < L + ext; t += step) {
+        const cx = ax + ux * t, cy = ay + uy * t;
+        body += '<line x1="' + (cx + px * railOff) + '" y1="' + (cy + py * railOff) + '" x2="' + (cx - px * railOff) + '" y2="' + (cy - py * railOff) + '" stroke="#c98a4b" stroke-width="0.85" stroke-linecap="round"/>';
+      }
+      body += '</g>';
+    });
+    // --- Saanp (curvy body, taper, head + eyes + tongue) ---
+    Object.keys(SNAKES).forEach(function (from) {
+      const head = cellCenter(parseInt(from, 10));
+      const tail = cellCenter(SNAKES[from]);
+      const dx = tail.x - head.x, dy = tail.y - head.y;
+      const L = Math.hypot(dx, dy) || 1;
+      const nx = -dy / L, ny = dx / L; // perpendicular
+      const waves = 2.5;
+      const amp = Math.min(3.6, L * 0.16);
+      const N = Math.max(8, Math.round(L * 1.6));
+      // per-snake gradient (head bright -> tail dark, Snake game wale colors)
+      const gid = 'sg' + (gi++);
+      defs += '<linearGradient id="' + gid + '" gradientUnits="userSpaceOnUse"' +
+        ' x1="' + head.x + '" y1="' + head.y + '" x2="' + tail.x + '" y2="' + tail.y + '">' +
+        '<stop offset="0" stop-color="#2ee078"/><stop offset="1" stop-color="#0b8c46"/>' +
+        '</linearGradient>';
+      body += '<g opacity="0.97">';
+      // shadow path
+      body += '<line x1="' + head.x + '" y1="' + (head.y + 0.5) + '" x2="' + tail.x + '" y2="' + (tail.y + 0.5) + '" stroke="rgba(0,0,0,0.15)" stroke-width="4.6" stroke-linecap="round"/>';
+      // body circles — snake game ke segment blocks jaisa (rounded, gradient)
+      const pts = [];
+      for (let i = 0; i <= N; i++) {
+        const t = i / N;
+        const wob = Math.sin(t * Math.PI * waves) * amp * (t > 0.08 && t < 0.95 ? 1 : 0.35);
+        pts.push({ x: head.x + dx * t + nx * wob, y: head.y + dy * t + ny * wob, t: t });
+      }
+      // path smooth line (thick) as base
+      const d = 'M ' + pts[0].x.toFixed(2) + ' ' + pts[0].y.toFixed(2) + ' ' +
+        pts.slice(1).map(function (p) { return 'Q ' + p.x.toFixed(2) + ' ' + p.y.toFixed(2) + ' ' + p.x.toFixed(2) + ' ' + p.y.toFixed(2); }).join(' ');
+      body += '<path d="' + d + '" fill="none" stroke="url(#' + gid + ')" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round"/>';
+      // belly pattern (halki light dots, real snake scale feel)
+      for (let i = 2; i < pts.length - 2; i += 2) {
+        body += '<circle cx="' + pts[i].x.toFixed(2) + '" cy="' + pts[i].y.toFixed(2) + '" r="0.55" fill="rgba(255,255,255,0.35)"/>';
+      }
+      // taper tail
+      body += '<circle cx="' + tail.x.toFixed(2) + '" cy="' + tail.y.toFixed(2) + '" r="1.05" fill="#0b8c46"/>';
+      // HEAD (snake game jaisa — bright, eyes, tongue)
+      const hx = head.x, hy = head.y;
+      // head ko tail ki taraf thoda jhuka do
+      const hdx = nx, hdy = ny;
+      body += '<circle cx="' + hx + '" cy="' + hy + '" r="2.9" fill="#66ff8f"/>';
+      body += '<circle cx="' + hx + '" cy="' + hy + '" r="2.9" fill="none" stroke="rgba(8,19,11,0.35)" stroke-width="0.3"/>';
+      // highlight (snake game top highlight)
+      body += '<circle cx="' + (hx - 0.6) + '" cy="' + (hy - 0.9) + '" r="1.1" fill="rgba(255,255,255,0.3)"/>';
+      // eyes (tail ki taraf dekhte hue)
+      const ex1 = hx + nx * 1.35, ey1 = hy + ny * 1.35;
+      const ex2 = hx - nx * 1.35, ey2 = hy - ny * 1.35;
+      body += '<circle cx="' + ex1 + '" cy="' + ey1 + '" r="0.8" fill="#fff"/><circle cx="' + ex1 + '" cy="' + ey1 + '" r="0.4" fill="#08130b"/>';
+      body += '<circle cx="' + ex2 + '" cy="' + ey2 + '" r="0.8" fill="#fff"/><circle cx="' + ex2 + '" cy="' + ey2 + '" r="0.4" fill="#08130b"/>';
+      // tongue (tail ki taraf, forked)
+      const tx = hx - dx / L * 3.6, ty = hy - dy / L * 3.6;
+      body += '<path d="M ' + hx + ' ' + hy + ' L ' + tx.toFixed(2) + ' ' + ty.toFixed(2) + '" stroke="#ff5252" stroke-width="0.5" fill="none"/>';
+      body += '<path d="M ' + tx.toFixed(2) + ' ' + ty.toFixed(2) + ' l -0.7 -0.7 M ' + tx.toFixed(2) + ' ' + ty.toFixed(2) + ' l -0.7 0.7" stroke="#ff5252" stroke-width="0.4" fill="none"/>';
+      body += '</g>';
+    });
+    svg.innerHTML = '<defs>' + defs + '</defs>' + body;
+  }
   // ===== Tokens =====
   const tokenEls = [];
   function posOf(n) {
@@ -93,10 +196,9 @@
     let target;
     if (p.pos <= 0) {
       // start line: board ke neeche queue
-      const boardRect = boardEl.getBoundingClientRect();
       target = {
-        left: 8 + i * 22,
-        top: 100 - 8,
+        left: 6 + i * 7.5,
+        top: 93,
       };
     } else {
       const base = posOf(Math.min(p.pos, WIN));
