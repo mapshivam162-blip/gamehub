@@ -9,9 +9,11 @@
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/board.css">
     <link rel="stylesheet" href="css/pieces.css">
+    <link rel="stylesheet" href="css/online.css">
     <style>
       #back-btn {
         position: fixed;
@@ -49,11 +51,23 @@
                 <div class="mode-row">
                     <button id="mode-2p" class="mode-btn active">👥 2 Player</button>
                     <button id="mode-ai" class="mode-btn">🤖 vs Robot</button>
+                    <button id="mode-online" class="mode-btn">🌐 Online</button>
                 </div>
                 <div class="diff-row" id="diff-row" style="display:none;">
                     <button class="diff-btn active" data-diff="easy">Easy</button>
                     <button class="diff-btn" data-diff="medium">Medium</button>
                     <button class="diff-btn" data-diff="hard">Hard</button>
+                </div>
+                <div id="online-card" class="online-card" style="display:none;">
+                    <h3>🌐 Online Room</h3>
+                    <div class="online-buttons">
+                        <button id="chess-create" class="online-btn create">🏠 Room Banao</button>
+                    </div>
+                    <div class="join-row">
+                        <input id="chess-code" class="join-input" maxlength="5" placeholder="CODE likho" autocomplete="off"/>
+                        <button id="chess-join" class="online-btn join">➜ Join</button>
+                    </div>
+                    <p id="chess-status" class="net-status">Room banao ya code se join karo</p>
                 </div>
                 <div class="status-bar" id="game-status">White's turn</div>
                 <div class="captured-row" id="captured-black"></div>
@@ -93,12 +107,27 @@
       </div>
     </div>
 
+    <!-- Chat (online mode) -->
+    <button id="chat-fab" class="chat-fab" aria-label="Chat">💬<span id="chat-badge" class="chat-badge hidden">0</span></button>
+    <div id="chat-panel" class="chat-panel">
+      <div class="chat-head">
+        <span>💬 Dost se Chat</span>
+        <button id="chat-close" class="chat-x">✕</button>
+      </div>
+      <div id="chat-msgs" class="chat-msgs"></div>
+      <div class="chat-input-row">
+        <input id="chat-input" class="chat-input" maxlength="120" placeholder="Message likho..." autocomplete="off"/>
+        <button id="chat-send" class="chat-send">➤</button>
+      </div>
+    </div>
+
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/pieces.js"></script>
     <script src="js/board.js"></script>
     <script src="js/drag.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/online.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

@@ -7,6 +7,7 @@ let currentPlayer = WHITE;
 let moveHistory = []; // Array of move objects { from: {row, col}, to: {row, col}, piece: Piece, captured: Piece|null }
 let isGameOver = false;
 let gameMode = '2p'; // '2p' or 'ai'
+let onlineColor = null; // 'w' | 'b' — Online mode me apna color (null = offline)
 let aiDifficulty = 'easy';
 let aiThinking = false;
 let kingPositions = { // Keep track of king positions for check detection
@@ -123,6 +124,8 @@ function resetGame() {
 function handleBoardClick(row, col) {
     console.log('handleBoardClick', row, col, 'piece:', boardState[row][col]?.color, boardState[row][col]?.type, 'currentPlayer:', currentPlayer);
     if (isGameOver) return; // Don't allow moves if game is over
+    // Online: sirf apni turn me kuch kar sakte ho
+    if (onlineColor && currentPlayer !== onlineColor) return;
 
     const clickedPiece = boardState[row][col];
 
@@ -167,7 +170,16 @@ function handleBoardClick(row, col) {
  * @param {number} endRow
  * @param {number} endCol
  */
-function makeMove(startRow, startCol, endRow, endCol) {
+function makeMove(startRow, startCol, endRow, endCol, fromRemote) {
+    // Online gating: sirf apne color ki goti, apni turn me
+    if (onlineColor) {
+        if (!fromRemote) {
+            if (currentPlayer !== onlineColor) return;
+            const mover = boardState[startRow] ? boardState[startRow][startCol] : null;
+            if (!mover || mover.color !== onlineColor) return;
+            sendMoveOnline(startRow, startCol, endRow, endCol);
+        }
+    }
     const pieceToMove = boardState[startRow][startCol];
     if (!pieceToMove) return; // Should not happen if logic is correct
 
@@ -326,8 +338,8 @@ function makeMove(startRow, startCol, endRow, endCol) {
  * Undo the last move and restore previous game state
  */
 function undoLastMove() {
-    if (positionHistory.length === 0 || isGameOver && moveHistory.length === 0) return;
-    const snapshot = positionHistory.pop();
+    if (onlineColor) return; // Online me undo nahi (sync kharab hota)
+    if (positionHistory.length === 0 || isGameOver && moveHistory.length === 0) return;    const snapshot = positionHistory.pop();
     boardState = snapshot.boardState;
     currentPlayer = snapshot.currentPlayer;
     moveHistory.pop(); // Each snapshot is taken right before exactly one move is recorded
@@ -874,7 +886,14 @@ function updateMoveHistoryDisplay() {
  * Updates the game status message in the DOM.
  */
 function updateStatusDisplay() {
-    gameStatusElement.textContent = currentStatus;
+    if (onlineColor) {
+        const side = currentPlayer === WHITE ? 'White' : 'Black';
+        gameStatusElement.textContent = isGameOver
+            ? currentStatus
+            : (currentPlayer === onlineColor ? `🟢 Tera turn (${side})` : `⏳ Dost ki turn (${side})`);
+    } else {
+        gameStatusElement.textContent = currentStatus;
+    }
     // Undo is only available while there is a move to take back
     if (undoButton) {
         undoButton.disabled = positionHistory.length === 0;
@@ -909,6 +928,16 @@ function handleResetClick() {
     }
     cancelResetConfirm();
     resetGame();
+    if (onlineColor && typeof window !== 'undefined' && window.chessSendNet) {
+        window.chessSendNet({ t: 'restart' });
+    }
+}
+
+// ---- Online helpers (js/online.js se connect hota hai) ----
+function sendMoveOnline(fr, fc, tr, tc) {
+    if (typeof window !== 'undefined' && window.chessSendNet) {
+        window.chessSendNet({ t: 'move', fr, fc, tr, tc });
+    }
 }
 
 /**
@@ -1101,12 +1130,16 @@ function setupModeUI() {
     mode2p.addEventListener('click', () => {
         mode2p.classList.add('active');
         modeAi.classList.remove('active');
+        const modeOnline = document.getElementById('mode-online');
+        if (modeOnline) modeOnline.classList.remove('active');
         gameMode = '2p';
         if (diffRow) diffRow.style.display = 'none';
     });
     modeAi.addEventListener('click', () => {
         modeAi.classList.add('active');
         mode2p.classList.remove('active');
+        const modeOnline = document.getElementById('mode-online');
+        if (modeOnline) modeOnline.classList.remove('active');
         gameMode = 'ai';
         if (diffRow) diffRow.style.display = 'flex';
     });
@@ -1179,6 +1212,9 @@ if (typeof window !== 'undefined') {
     window.findKingInCheck = findKingInCheck;
     window.makeMove = makeMove;
     window.showHint = showHint;
+    window.resetGame = resetGame;
+    window.chessSetOnlineColor = function (c) { onlineColor = c; };
+    window.chessIsOnline = function () { return !!onlineColor; };
     // Expose state getters (selectedSquare and possibleMoves are in board.js)
     Object.defineProperty(window, 'boardState', {
         get: function() { return boardState; }

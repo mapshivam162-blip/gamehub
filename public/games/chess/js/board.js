@@ -192,6 +192,10 @@ function updateBoardVisuals(boardState, kingInCheckCoords = null) {
         const moveElement = getSquareElement(move.row, move.col);
         if (moveElement) {
             moveElement.classList.add('possible-move');
+            // Capture target pe red ring (:has() support nahi wale purane WebView ke liye bhi)
+            if (moveElement.querySelector('.piece')) {
+                moveElement.classList.add('possible-capture');
+            }
         }
     });
 

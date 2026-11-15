@@ -328,6 +328,28 @@ function netStatus(text, cls) {
   netStatusEl.className = 'net-status' + (cls ? ' ' + cls : '');
 }
 
+function copyText(txt) {
+  const done = () => netStatus('✅ Copy ho gaya! Dost ko bhejo', 'ok');
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      done();
+    } catch (e) { netStatus('Copy nahi hua — code yaad rakho', 'err'); }
+  };
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done, fallback);
+    } else fallback();
+  } catch (e) { fallback(); }
+}
+
 document.getElementById('create-room-btn').addEventListener('click', createRoom);
 document.getElementById('join-room-btn').addEventListener('click', joinRoom);
 document.getElementById('join-code').addEventListener('keydown', (e) => {
@@ -348,8 +370,9 @@ function createRoom() {
     peer = new Peer(peerIdFor(code));
   } catch (e) { netStatus('Network error! Internet check karo', 'err'); return; }
   peer.on('open', () => {
-    netStatusEl.innerHTML = `Room Code: <span class="room-code-big">${code}</span><br>Dost ka wait...`;
+    netStatusEl.innerHTML = `Room Code: <span class="room-code-big">${code}</span><br><button id="copy-code-btn" class="copy-code-btn">📋 Code Copy Karo</button><br>Dost ka wait...`;
     netStatusEl.className = 'net-status';
+    document.getElementById('copy-code-btn').addEventListener('click', () => copyText(code));
   });
   peer.on('connection', (c) => { conn = c; wireConn(); });
   peer.on('error', (e) => netStatus('Error: ' + e.type, 'err'));

@@ -393,6 +393,17 @@ body {
 .net-status { font-size: 11px; font-weight: 800; color: #64748b; text-align: center; margin-top: 4px; min-height: 15px; }
 .net-status.ok { color: #16a34a; }
 .net-status.err { color: #dc2626; }
+.copy-code-btn {
+  margin: 4px 0 6px;
+  padding: 8px 18px;
+  border: none; border-radius: 999px;
+  background: linear-gradient(180deg, #fbbf24, #f59e0b);
+  color: #78350f;
+  font-family: inherit; font-size: 12px; font-weight: 900;
+  box-shadow: 0 3px 0 #b45309;
+  cursor: pointer;
+}
+.copy-code-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #b45309; }
 .room-code-big {
   font-size: 22px; font-weight: 900; letter-spacing: 6px; color: #0284c7;
   text-align: center; margin: 2px 0 6px;

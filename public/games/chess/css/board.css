@@ -30,27 +30,39 @@
 
 .square.selected {
     background-color: var(--selected-square);
-    box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.7);
+    box-shadow: inset 0 0 0 3px rgba(74, 222, 128, 0.8);
 }
 
-.square.possible-move::after {
+/* Green dots: legal empty destinations (~28% diameter, clean & centered).
+   Dark squares #4ADE80, light squares #22C55E at 0.85 opacity.
+   .chess-board prefix + display:block — kyunki coords rule (.square::after)
+   display:none laga deta tha aur dots kabhi dikhte hi nahi the! */
+.chess-board .square.possible-move::after {
     content: '';
     position: absolute;
     width: 28%;
     height: 28%;
-    background-color: var(--possible-move-square);
+    background-color: #4ADE80;
     border-radius: 50%;
     pointer-events: none;
     z-index: 2;
+    display: block;
+}
+.chess-board .square.possible-move.light::after {
+    background-color: rgba(34, 197, 94, 0.85);
 }
 
-.square.possible-move:has(.piece)::after {
-    width: 78%;
-    height: 78%;
+/* Capture ring: enemy piece wale target pe glowing green ring.
+   JS 'possible-capture' class lagata hai (purane WebView me :has() nahi chalta) */
+.chess-board .square.possible-move:has(.piece)::after,
+.chess-board .square.possible-capture::after {
+    width: 82%;
+    height: 82%;
     background-color: transparent;
-    border: 4px solid var(--possible-move-square);
+    border: 4px solid rgba(74, 222, 128, 0.85);
     border-radius: 50%;
     box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.55), 0 0 4px rgba(74, 222, 128, 0.7);
 }
 
 .square.in-check {
@@ -65,7 +77,7 @@
 
 .square.last-move-from,
 .square.last-move-to {
-    background-color: rgba(100, 150, 220, 0.4);
+    background-color: rgba(250, 204, 21, 0.45);
 }
 
 /* Coordinates */
