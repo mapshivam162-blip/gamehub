@@ -1,6 +1,6 @@
 import './style.css';
 import {
-  mode, signUp, login, logout, getSession,
+  mode, signUp, login, logout, getSession, onAuthChange,
   publishGame, fetchGames, deleteGame, isAdmin, TRY_GOAL, MAX_HTML, MAX_LOGO,
 } from './firebase.js';
 
@@ -264,5 +264,6 @@ document.addEventListener('click', async (e) => {
   }
 });
 
-// Init
-renderSession();
+// Init — Firebase auth async restore hota hai, isliye dono chalao:
+renderSession();          // turant (demo/instant)
+onAuthChange(renderSession);  // restore hone par dobara

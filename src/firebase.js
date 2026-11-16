@@ -132,6 +132,17 @@ export function getSession() {
   return u ? { email: u.email, name: u.displayName || u.email, uid: u.uid } : null;
 }
 
+// Firebase auth ASYNC restore hota hai (page load ke baad) — isliye
+// UI ko subscribe karna padta hai, warna logged-in dikh hi nahi sakta
+export function onAuthChange(fn) {
+  if (mode === 'demo') { fn(); return () => {}; }
+  if (!auth) { return () => {}; }
+  const [, authMod] = fbMods;
+  return authMod.onAuthStateChanged(auth, (u) => {
+    fn(u ? { email: u.email, name: u.displayName || u.email, uid: u.uid } : null);
+  });
+}
+
 // ---------- GAMES ----------
 export const MAX_HTML = 30 * 1024 * 1024;    // 30MB game (chunks me store hota hai)
 export const MAX_LOGO = 200 * 1024;          // 200KB logo (dataURL)
