@@ -5,12 +5,12 @@
 // (sab data localStorage me — sirf tumhare phone pe dikhega)
 // ============================================================
 const FIREBASE_CONFIG = {
-  apiKey: 'PASTE_API_KEY',
-  authDomain: 'PASTE_AUTH_DOMAIN',
-  projectId: 'PASTE_PROJECT_ID',
-  storageBucket: 'PASTE_STORAGE_BUCKET',
-  messagingSenderId: 'PASTE_SENDER_ID',
-  appId: 'PASTE_APP_ID',
+  apiKey: 'AIzaSyDU2ViPia-hJAix9Td4wpeXeIE_DlKZ_Rk',
+  authDomain: 'khelog-9b4e3.firebaseapp.com',
+  projectId: 'khelog-9b4e3',
+  storageBucket: 'khelog-9b4e3.firebasestorage.app',
+  messagingSenderId: '1083997786967',
+  appId: '1:1083997786967:web:ad558520ecc38aaa33a412',
 };
 
 // Placeholder detection — agar paste nahi hua to demo mode
@@ -354,7 +354,7 @@ export async function getGame(id, onProgress) {
 }
 
 // Apne games delete karo (ya admin — email allowlist)
-export const ADMIN_EMAILS = ['PASTE_ADMIN_EMAIL@gmail.com'];
+export const ADMIN_EMAILS = ['ankitmovie648@gmail.com'];
 export function isAdmin(email) {
   return email && ADMIN_EMAILS.includes(email);
 }

@@ -44,7 +44,7 @@ service cloud.firestore {
       // delete: apna game ya admin
       allow delete: if request.auth != null
         && (resource.data.authorUid == request.auth.uid
-            || request.auth.token.email in ['APNA_EMAIL@gmail.com']);
+            || request.auth.token.email in ['ankitmovie648@gmail.com']);
     }
     match /gamehtml/{chunkId} {
       // game chunks — sabko read (play ke liye), publisher hi write kare
@@ -52,12 +52,12 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow delete: if request.auth != null
         && (resource.data.authorUid == request.auth.uid
-            || request.auth.token.email in ['APNA_EMAIL@gmail.com']);
+            || request.auth.token.email in ['ankitmovie648@gmail.com']);
     }
   }
 }
 ```
-> `APNA_EMAIL@gmail.com` ki jagah apna email daalo (dono jagah same).
+> `ankitmovie648@gmail.com` ki jagah apna email daalo (dono jagah same).
 
 ## Step 6 — Build + deploy
 ```
