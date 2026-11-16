@@ -1,5 +1,6 @@
 import { games } from './games.js';
 import './style.css';
+import { fetchGames, cachedGames, addTry, deviceId, TRY_GOAL, onGamesChange } from './firebase.js';
 
 // ---------- Player identity ----------
 if (!localStorage.getItem('player_name')) {
@@ -325,3 +326,82 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// ---------- Community games (Publisher Studio se publish huye) ----------
+const cGrid = document.getElementById('community-grid');
+const cCount = document.getElementById('community-count');
+const cEmpty = document.getElementById('community-empty');
+
+function communityCard(g, i) {
+  const isLive = g.status === 'live';
+  const tries = g.tryCount || 0;
+  const pct = Math.min(100, Math.round((tries / TRY_GOAL) * 100));
+  const badge = isLive
+    ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black">✅ LIVE</span>'
+    : '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[9px] font-black">🧪 ' + tries + '/' + TRY_GOAL + '</span>';
+  const btn = isLive
+    ? '<button class="c-play w-full py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-clay-btn tactile-press text-center" data-id="' + g.id + '">Play</button>'
+    : '<button class="c-try w-full py-1.5 rounded-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs shadow-clay-btn tactile-press text-center" data-id="' + g.id + '">🧪 TRY karo</button>';
+  const bar = isLive ? '' :
+    '<div class="w-full h-1.5 rounded-full bg-slate-100 mt-1 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500" style="width:' + pct + '%"></div></div>';
+  return `
+    <div class="bg-white rounded-[28px] p-3 shadow-clay-card border border-white flex flex-col items-center text-center fade-up" style="animation-delay:${i * 60}ms">
+      <div class="w-16 h-16 rounded-[22px] bg-gradient-to-tr from-slate-500 to-slate-800 shadow-md p-0.5 mb-2.5 overflow-hidden">
+        <div class="w-full h-full rounded-[20px] flex flex-col items-center justify-center" style="background:#1e2333">
+          <span class="text-xl leading-none">${g.emoji || '🎮'}</span>
+        </div>
+      </div>
+      <h3 class="text-[13px] font-black text-slate-900 truncate w-full">${g.title}</h3>
+      <p class="text-[9.5px] font-bold text-slate-400 truncate w-full mt-0.5">by ${g.author || 'Publisher'}</p>
+      <div class="flex items-center space-x-2 text-[10px] font-bold text-slate-400 mt-1">
+        ${badge}<span><i class="fa-solid fa-thumbs-up text-slate-400 text-[9px]"></i> ${g.likes || 0}</span><span>▶ ${g.plays || 0}</span>
+      </div>
+      <div class="w-full my-2">${bar}</div>
+      ${btn}
+    </div>`;
+}
+
+function renderCommunity(list) {
+  if (!cGrid) return;
+  if (!list.length) {
+    cGrid.innerHTML = '';
+    if (cEmpty) cEmpty.style.display = 'block';
+    if (cCount) cCount.textContent = '';
+    return;
+  }
+  if (cEmpty) cEmpty.style.display = 'none';
+  const live = list.filter((g) => g.status === 'live');
+  const trying = list.filter((g) => g.status !== 'live');
+  const sorted = [...live, ...trying];
+  cGrid.innerHTML = sorted.map((g, i) => communityCard(g, i)).join('');
+  if (cCount) cCount.textContent = live.length + ' live · ' + trying.length + ' coming soon';
+}
+
+function onCommunityClick(e) {
+  const btn = e.target.closest('.c-play, .c-try');
+  if (!btn) return;
+  e.preventDefault();
+  const id = btn.dataset.id;
+  const isTry = btn.classList.contains('c-try');
+  if (isTry) {
+    // ek device = ek try; fir play page khul jayega (try banner wahan dikhega)
+    addTry(id).catch(() => {}).finally(() => {
+      const played = parseInt(localStorage.getItem('games_played') || '0', 10) + 1;
+      localStorage.setItem('games_played', String(played));
+      location.href = 'play.html?id=' + encodeURIComponent(id);
+    });
+  } else {
+    const played = parseInt(localStorage.getItem('games_played') || '0', 10) + 1;
+    localStorage.setItem('games_played', String(played));
+    location.href = 'play.html?id=' + encodeURIComponent(id);
+  }
+}
+if (cGrid) cGrid.addEventListener('click', onCommunityClick);
+
+// offline-first: pehle cache, phir fresh fetch
+renderCommunity(cachedGames().filter((g) => g.id));
+fetchGames().then(renderCommunity).catch(() => {});
+onGamesChange(() => {
+  renderCommunity(cachedGames().filter((g) => g.id));
+  fetchGames().then(renderCommunity).catch(() => {});
+});
