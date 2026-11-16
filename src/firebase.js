@@ -81,6 +81,13 @@ if (CONFIGURED) {
 }
 
 // ---------- AUTH ----------
+// Auth session ka localStorage mirror — Firebase kabhi-kabhi restore
+// skip karta hai (WebView/IndexedDB issue), isse login hamesha yaad rahega
+function saveMirror(s) {
+  if (s) localStorage.setItem('khelog_fb_session', JSON.stringify(s));
+  else localStorage.removeItem('khelog_fb_session');
+}
+
 export async function signUp(name, email, pass) {
   if (mode === 'demo') {
     const users = JSON.parse(localStorage.getItem('khelog_users') || '{}');
@@ -93,7 +100,8 @@ export async function signUp(name, email, pass) {
   const [, authMod] = fbMods;
   const cred = await authMod.createUserWithEmailAndPassword(auth, email, pass);
   await authMod.updateProfile(cred.user, { displayName: name });
-  return { email: cred.user.email, name };
+  saveMirror({ email: cred.user.email, name, uid: cred.user.uid });
+  return { email: cred.user.email, name, uid: cred.user.uid };
 }
 
 export async function login(email, pass) {
@@ -107,7 +115,9 @@ export async function login(email, pass) {
   }
   const [, authMod] = fbMods;
   const cred = await authMod.signInWithEmailAndPassword(auth, email, pass);
-  return { email: cred.user.email, name: cred.user.displayName || email };
+  const s = { email: cred.user.email, name: cred.user.displayName || email, uid: cred.user.uid };
+  saveMirror(s);
+  return s;
 }
 
 export async function logout() {
@@ -116,6 +126,7 @@ export async function logout() {
     return;
   }
   const [, authMod] = fbMods;
+  saveMirror(null);
   await authMod.signOut(auth);
 }
 
@@ -127,9 +138,16 @@ export function getSession() {
       return null;
     }
   }
-  if (!auth) return null;
-  const u = auth.currentUser;
-  return u ? { email: u.email, name: u.displayName || u.email, uid: u.uid } : null;
+  if (auth && auth.currentUser) {
+    const u = auth.currentUser;
+    return { email: u.email, name: u.displayName || u.email, uid: u.uid };
+  }
+  // Fallback: Firebase restore miss ho jaye to mirror se session dikhao
+  try {
+    return JSON.parse(localStorage.getItem('khelog_fb_session') || 'null');
+  } catch {
+    return null;
+  }
 }
 
 // Firebase auth ASYNC restore hota hai (page load ke baad) — isliye
@@ -139,7 +157,9 @@ export function onAuthChange(fn) {
   if (!auth) { return () => {}; }
   const [, authMod] = fbMods;
   return authMod.onAuthStateChanged(auth, (u) => {
-    fn(u ? { email: u.email, name: u.displayName || u.email, uid: u.uid } : null);
+    const s = u ? { email: u.email, name: u.displayName || u.email, uid: u.uid } : null;
+    if (u) saveMirror(s); else saveMirror(null);
+    fn(s);
   });
 }
 
