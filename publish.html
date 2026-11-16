@@ -114,12 +114,27 @@
     </div>
     <input id="g-desc" type="text" maxlength="120" placeholder="Choti si description (kaise khelte hain?)" class="w-full px-4 py-3 mb-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-sm font-bold outline-none focus:border-blue-400"/>
 
+    <!-- Logo picker -->
+    <div class="flex items-center gap-3 mb-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl p-3">
+      <div id="g-logo-preview-wrap" class="hidden">
+        <img id="g-logo-preview" class="w-12 h-12 rounded-[14px] object-cover shadow-md" alt="logo"/>
+      </div>
+      <div class="flex-1 min-w-0">
+        <label class="px-3.5 py-2 rounded-full bg-white border border-slate-200 text-slate-700 font-black text-xs tactile-press cursor-pointer inline-block" id="g-logo-label">
+          🖼️ Logo chuno (PNG/JPG)
+          <input id="g-logo-file" type="file" accept="image/*" class="hidden"/>
+        </label>
+        <p class="text-[9px] font-bold text-slate-400 mt-1">Card pe yahi logo dikhega · 200KB tak (auto-shrink hota hai)</p>
+      </div>
+      <button id="g-logo-remove" class="px-2.5 py-1.5 rounded-full bg-rose-50 text-rose-500 font-black text-[10px] tactile-press">✕</button>
+    </div>
+
     <div class="flex items-center gap-2 mb-2">
       <label class="px-4 py-2.5 rounded-full bg-slate-100 text-slate-700 font-black text-xs tactile-press cursor-pointer">
         📁 .html file chuno
         <input id="g-file" type="file" accept=".html,.htm,text/html" class="hidden"/>
       </label>
-      <span id="g-size" class="text-[10px] font-bold text-slate-400">max 300KB</span>
+      <span id="g-size" class="text-[10px] font-bold text-slate-400">max 30MB</span>
     </div>
     <textarea id="g-html" rows="6" placeholder="…ya yahan pura HTML paste karo" class="w-full px-4 py-3 mb-1 rounded-2xl bg-slate-50 border-2 border-slate-200 text-[11px] font-mono outline-none focus:border-blue-400"></textarea>
     <p id="g-count" class="text-[10px] font-bold text-slate-400 text-right mb-3">0 KB</p>

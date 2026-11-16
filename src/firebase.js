@@ -1,6 +1,6 @@
 // Khelog Community Games — Firebase setup
 // ============================================================
-// YAHAN APNA FIREBASE CONFIG DAALO (publish me checklist dekho)
+// YAHAN APNA FIREBASE CONFIG DAALO (FIREBASE_SETUP.md dekho)
 // Jab tak config nahi hai, app DEMO MODE me chalega
 // (sab data localStorage me — sirf tumhare phone pe dikhega)
 // ============================================================
@@ -133,27 +133,50 @@ export function getSession() {
 }
 
 // ---------- GAMES ----------
-export const MAX_HTML = 300 * 1024; // 300KB limit per game
+export const MAX_HTML = 30 * 1024 * 1024;    // 30MB game (chunks me store hota hai)
+export const MAX_LOGO = 200 * 1024;          // 200KB logo (dataURL)
+const CHUNK_SIZE = 900_000;                  // Firestore doc limit ~1MB, safe chunk
 const REQUIRED_TAGS = /<html|<canvas|<body|<script/i;
 
-export async function publishGame(data) {
-  const { title, emoji, desc, html } = data;
+function validateGame({ title, emoji, desc, html, logo }) {
   if (!title || title.trim().length < 3) throw new Error('Title kam se kam 3 letters ka ho');
   if (title.length > 40) throw new Error('Title 40 letters se chota rakho');
   if (!desc || desc.trim().length < 5) throw new Error('Description likho (5+ letters)');
   if (desc.length > 120) throw new Error('Description 120 letters se choti rakho');
   if (!html || html.length < 50) throw new Error('Game HTML paste karo');
-  if (html.length > MAX_HTML) throw new Error('Game file ' + Math.round(MAX_HTML / 1024) + 'KB se choti honi chahiye (tumhari: ' + Math.round(html.length / 1024) + 'KB)');
+  if (html.length > MAX_HTML) {
+    throw new Error('Game ' + (html.length / 1024 / 1024).toFixed(1) + 'MB hai — max 30MB tak hi');
+  }
   if (!REQUIRED_TAGS.test(html)) throw new Error('Ye valid HTML game nahi lag raha');
+  if (logo) {
+    if (typeof logo !== 'string' || !logo.startsWith('data:image/')) {
+      throw new Error('Logo image file honi chahiye');
+    }
+    if (logo.length > MAX_LOGO) throw new Error('Logo 200KB se chota hono chahiye');
+  }
+}
+
+// chunks: [{ id: gameId_i, text }] — gamehtml collection me ek doc per chunk
+function splitChunks(gameId, html) {
+  const parts = [];
+  for (let i = 0; i < html.length; i += CHUNK_SIZE) {
+    parts.push(html.slice(i, i + CHUNK_SIZE));
+  }
+  return parts;
+}
+
+export async function publishGame(data, onProgress) {
+  const { title, emoji, desc, html, logo } = data;
+  validateGame({ title, emoji, desc, html, logo });
 
   const s = getSession();
   if (!s) throw new Error('Pehle login karo');
 
-  const doc = {
+  const base = {
     title: title.trim(),
     emoji: emoji || '🎮',
+    logo: logo || '',
     desc: desc.trim(),
-    html,
     author: s.name || s.email,
     authorEmail: s.email,
     authorUid: s.uid || s.email,
@@ -167,14 +190,33 @@ export async function publishGame(data) {
 
   if (mode === 'demo') {
     const arr = readLocal();
-    doc.id = 'demo_' + Date.now().toString(36);
-    arr.unshift(doc);
-    writeLocal(arr);
+    base.id = 'demo_' + Date.now().toString(36);
+    base.html = html;
+    try {
+      arr.unshift(base);
+      writeLocal(arr);
+    } catch (e) {
+      throw new Error('Demo mode ka storage bhar gaya! Firebase config paste karo (FIREBASE_SETUP.md) — 30MB games wahan hi chalenge');
+    }
     notify();
-    return doc.id;
+    return base.id;
   }
+
+  // Firebase: meta doc (games) + html chunks (gamehtml, ek doc ~900KB)
   const [, , fsMod] = fbMods;
-  const ref = await fsMod.addDoc(fsMod.collection(db, 'games'), doc);
+  const parts = splitChunks('', html);
+  base.size = html.length;
+  base.chunks = parts.length;
+  const ref = await fsMod.addDoc(fsMod.collection(db, 'games'), base);
+  for (let i = 0; i < parts.length; i++) {
+    await fsMod.setDoc(fsMod.doc(db, 'gamehtml', ref.id + '_' + i), {
+      gameId: ref.id,
+      idx: i,
+      text: parts[i],
+      authorUid: base.authorUid,
+    });
+    if (onProgress) onProgress(i + 1, parts.length);
+  }
   notify();
   return ref.id;
 }
@@ -251,34 +293,64 @@ export async function addLike(gameId) {
 }
 
 // Community games list (live + try dono). LocalStorage cache bhi rakhta hai
-// taaki offline pe bhi cards dikhen.
+// taaki offline pe bhi cards dikhen. HTML chunks cache me NAHI jaate (heavy).
 export function cachedGames() {
-  return readLocal();
+  return readLocal().map((g) => {
+    const c = { ...g };
+    delete c.html;
+    return c;
+  });
+}
+
+function stripHtml(list) {
+  return list.map((g) => {
+    const c = { ...g };
+    delete c.html;
+    return c;
+  });
 }
 
 export async function fetchGames() {
-  if (mode === 'demo') return readLocal();
-  if (!db) return readLocal();
+  if (mode === 'demo') return stripHtml(readLocal());
+  if (!db) return cachedGames();
   const [, , fsMod] = fbMods;
   try {
     const snap = await fsMod.getDocs(
       fsMod.query(fsMod.collection(db, 'games'), fsMod.orderBy('createdAt', 'desc'))
     );
     const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    writeLocal(arr);
-    return arr;
+    writeLocal(stripHtml(arr));
+    return stripHtml(arr);
   } catch (e) {
     console.warn('fetchGames fail, cache se:', e);
-    return readLocal();
+    return cachedGames();
   }
 }
 
-export async function getGame(id) {
-  if (mode === 'demo') return readLocal().find((x) => x.id === id) || null;
-  if (!db) return readLocal().find((x) => x.id === id) || null;
+// Pura game meta + html (chunks reassemble). onProgress(done, total) optional
+export async function getGame(id, onProgress) {
+  if (mode === 'demo' || !db) {
+    const g = readLocal().find((x) => x.id === id);
+    return g || null;
+  }
   const [, , fsMod] = fbMods;
   const snap = await fsMod.getDoc(fsMod.doc(db, 'games', id));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  if (!snap.exists()) return null;
+  const meta = { id: snap.id, ...snap.data() };
+
+  // Legacy: purane docs me html seedha tha
+  if (meta.html) return meta;
+  if (!meta.chunks) return null;
+
+  const parts = [];
+  for (let i = 0; i < meta.chunks; i++) {
+    const cs = await fsMod.getDoc(fsMod.doc(db, 'gamehtml', id + '_' + i));
+    if (!cs.exists()) return null; // chunk missing — game corrupt
+    parts.push(cs.data().text);
+    if (onProgress) onProgress(i + 1, meta.chunks);
+  }
+  meta.html = parts.join('');
+  return meta;
 }
 
 // Apne games delete karo (ya admin — email allowlist)
@@ -304,6 +376,11 @@ export async function deleteGame(gameId, session) {
   if (g.authorUid !== s?.uid && !isAdmin(s?.email)) {
     throw new Error('Ye game tumhara nahi hai');
   }
+  // chunks delete
+  const q = await fsMod.getDocs(
+    fsMod.query(fsMod.collection(db, 'gamehtml'), fsMod.where('gameId', '==', gameId))
+  );
+  for (const d of q.docs) await fsMod.deleteDoc(d.ref);
   await fsMod.deleteDoc(fsMod.doc(db, 'games', gameId));
   notify();
 }

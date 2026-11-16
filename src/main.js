@@ -347,8 +347,10 @@ function communityCard(g, i) {
   return `
     <div class="bg-white rounded-[28px] p-3 shadow-clay-card border border-white flex flex-col items-center text-center fade-up" style="animation-delay:${i * 60}ms">
       <div class="w-16 h-16 rounded-[22px] bg-gradient-to-tr from-slate-500 to-slate-800 shadow-md p-0.5 mb-2.5 overflow-hidden">
-        <div class="w-full h-full rounded-[20px] flex flex-col items-center justify-center" style="background:#1e2333">
-          <span class="text-xl leading-none">${g.emoji || '🎮'}</span>
+        <div class="w-full h-full rounded-[20px] flex flex-col items-center justify-center overflow-hidden" style="background:#1e2333">
+          ${g.logo
+            ? `<img src="${g.logo}" alt="${g.title}" class="w-full h-full object-cover rounded-[20px]">`
+            : `<span class="text-xl leading-none">${g.emoji || '🎮'}</span>`}
         </div>
       </div>
       <h3 class="text-[13px] font-black text-slate-900 truncate w-full">${g.title}</h3>

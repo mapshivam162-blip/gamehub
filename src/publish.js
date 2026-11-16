@@ -1,7 +1,7 @@
 import './style.css';
 import {
   mode, signUp, login, logout, getSession,
-  publishGame, fetchGames, deleteGame, isAdmin, TRY_GOAL, MAX_HTML,
+  publishGame, fetchGames, deleteGame, isAdmin, TRY_GOAL, MAX_HTML, MAX_LOGO,
 } from './firebase.js';
 
 const $ = (id) => document.getElementById(id);
@@ -84,13 +84,65 @@ document.querySelectorAll('.eq').forEach((b) => {
   b.addEventListener('click', () => { $('g-emoji').value = b.textContent; });
 });
 
+// ---------- Logo picker (card pe publisher ka logo dikhega) ----------
+let logoData = '';
+$('g-logo-file').addEventListener('change', async () => {
+  const f = $('g-logo-file').files[0];
+  if (!f) return;
+  if (!f.type.startsWith('image/')) return toast('❌ Image file chuno (PNG/JPG)');
+  try {
+    logoData = await shrinkImage(f);
+    $('g-logo-preview').src = logoData;
+    $('g-logo-preview-wrap').classList.remove('hidden');
+    $('g-logo-label').textContent = '✅ Logo set — badalna ho to phir chuno';
+    toast('🖼️ Logo ready! (' + Math.round(logoData.length / 1024) + 'KB)');
+  } catch (e) {
+    toast('❌ Logo process nahi hua: ' + e.message);
+  }
+});
+$('g-logo-remove').addEventListener('click', () => {
+  logoData = '';
+  $('g-logo-preview').src = '';
+  $('g-logo-preview-wrap').classList.add('hidden');
+  $('g-logo-label').textContent = '🖼️ Logo chuno (PNG/JPG)';
+});
+
+// Badi image ko 256x256 JPEG dataURL me shrink karo (200KB cap ke liye)
+function shrinkImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const max = 256;
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      // quality loop — 200KB me fit karo
+      let q = 0.85;
+      let out = c.toDataURL('image/jpeg', q);
+      while (out.length > MAX_LOGO && q > 0.3) {
+        q -= 0.15;
+        out = c.toDataURL('image/jpeg', q);
+      }
+      if (out.length > MAX_LOGO) return reject(new Error('image bohot badi hai'));
+      resolve(out);
+    };
+    img.onerror = () => reject(new Error('image load fail'));
+    img.src = url;
+  });
+}
+
 // ---------- HTML input (file ya paste) ----------
 let htmlSize = 0;
 $('g-file').addEventListener('change', async () => {
   const f = $('g-file').files[0];
   if (!f) return;
   if (f.size > MAX_HTML) {
-    toast('❌ File ' + Math.round(f.size / 1024) + 'KB hai — 300KB se choti chahiye');
+    toast('❌ File ' + (f.size / 1024 / 1024).toFixed(1) + 'MB hai — max 30MB tak hi');
     return;
   }
   const text = await f.text();
@@ -102,8 +154,9 @@ $('g-file').addEventListener('change', async () => {
 function updateCount() {
   htmlSize = $('g-html').value.length;
   $('g-count').textContent =
-    (htmlSize / 1024).toFixed(1) + ' KB / 300 KB' +
-    (htmlSize > MAX_HTML ? '  ⚠️ bohot bada!' : '');
+    htmlSize > 1024 * 1024
+      ? (htmlSize / 1024 / 1024).toFixed(1) + ' MB / 30 MB'
+      : (htmlSize / 1024).toFixed(1) + ' KB / 30 MB';
   $('g-count').classList.toggle('text-rose-500', htmlSize > MAX_HTML);
 }
 $('g-html').addEventListener('input', updateCount);
@@ -122,21 +175,36 @@ $('preview-close').addEventListener('click', () => {
 });
 
 // ---------- Publish ----------
+let publishing = false;
 $('g-publish').addEventListener('click', async () => {
+  if (publishing) return toast('⏳ Publish chal raha hai, ruko...');
+  publishing = true;
+  $('g-publish').textContent = '⏳ Uploading...';
   try {
     const id = await publishGame({
       title: $('g-title').value,
       emoji: $('g-emoji').value.trim() || '🎮',
       desc: $('g-desc').value,
       html: $('g-html').value,
+      logo: logoData,
+    }, (done, total) => {
+      if (total > 1) {
+        $('g-publish').textContent = '⏳ Uploading ' + done + '/' + total + '…';
+      }
     });
     toast('🎉 Publish ho gaya! Ab 20 try ka intezaar...');
     $('g-title').value = ''; $('g-desc').value = ''; $('g-html').value = '';
     $('g-file').value = '';
+    logoData = '';
+    $('g-logo-preview-wrap').classList.add('hidden');
+    $('g-logo-label').textContent = '🖼️ Logo chuno (PNG/JPG)';
     updateCount();
     loadMyGames();
   } catch (e) {
     toast('❌ ' + e.message);
+  } finally {
+    publishing = false;
+    $('g-publish').textContent = '🚀 Publish karo';
   }
 });
 
@@ -151,7 +219,11 @@ function gameRow(g, mine) {
   const bar = isLive ? '' :
     '<div class="w-full h-1.5 rounded-full bg-slate-100 mt-1.5 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500" style="width:' + pct + '%"></div></div>';
   return '<div class="bg-white rounded-[22px] p-3.5 shadow-clay-card border border-white flex items-center gap-3">' +
-    '<div class="w-11 h-11 rounded-[16px] bg-gradient-to-tr from-slate-700 to-slate-900 flex items-center justify-center text-lg shadow-sm">' + g.emoji + '</div>' +
+    '<div class="w-11 h-11 rounded-[16px] bg-gradient-to-tr from-slate-700 to-slate-900 flex items-center justify-center text-lg shadow-sm overflow-hidden">' +
+    (g.logo
+      ? '<img src="' + g.logo + '" class="w-full h-full object-cover" alt="">'
+      : g.emoji) +
+    '</div>' +
     '<div class="flex-1 min-w-0">' +
       '<p class="text-[13px] font-black text-slate-900 truncate">' + g.title + '</p>' +
       '<p class="text-[10px] font-bold text-slate-400 truncate">' + (mine ? g.author : g.desc || g.author) + ' · ' + (g.plays || 0) + ' plays</p>' +

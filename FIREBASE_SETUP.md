@@ -29,23 +29,27 @@ Ye rules paste karke **Publish** dabao:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Game meta (title, logo, tries, plays...) + HTML chunks
     match /games/{gameId} {
-      // sabko games dikhengi (play page + home)
       allow read: if true;
       // publish: sirf logged-in publisher, apne naam se
       allow create: if request.auth != null
         && request.resource.data.authorUid == request.auth.uid
-        && request.resource.data.html.size() < 320000
         && request.resource.data.status == 'try'
         && request.resource.data.title.size() >= 3
         && request.resource.data.title.size() <= 40;
-      // try/plays/likes update: html aur author wapas nahi badal sakte
-      allow update: if request.auth == null || request.auth != null
-        && request.resource.data.html == resource.data.html
-        && request.resource.data.authorUid == resource.data.authorUid
-        && request.resource.data.status == resource.data.status
-        || (request.auth != null && request.auth.uid == resource.data.authorUid);
+      // try/plays/likes sirf — html/author/title wapas nahi badal sakte
+      allow update: if request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['tries', 'tryCount', 'status', 'plays', 'likes']);
       // delete: apna game ya admin
+      allow delete: if request.auth != null
+        && (resource.data.authorUid == request.auth.uid
+            || request.auth.token.email in ['APNA_EMAIL@gmail.com']);
+    }
+    match /gamehtml/{chunkId} {
+      // game chunks — sabko read (play ke liye), publisher hi write kare
+      allow read: if true;
+      allow create: if request.auth != null;
       allow delete: if request.auth != null
         && (resource.data.authorUid == request.auth.uid
             || request.auth.token.email in ['APNA_EMAIL@gmail.com']);
@@ -69,6 +73,13 @@ phir gh-pages + Vercel deploy (jaise hamesha).
 3. Har naye device ka TRY count hota hai (1 device = 1 try)
 4. **20 try pure** → game **auto-LIVE** → normal PLAY card ban jayega
 5. Publisher apne games ko delete bhi kar sakta hai (publish.html me)
+
+## 📦 Game size & logo
+- Game file **max 30MB** — Firestore ke 1MB doc limit ki wajah se game automatically
+  ~900KB ke **chunks** me store hota hai (publisher ko kuch nahi karna padta)
+- Publisher apna **logo** (PNG/JPG) dal sakta hai — auto 256×256 shrink ho kar
+  card pe dikhta hai
+- Play page pe bade game download hote waqt progress dikhta hai (⬇️ 12/34…)
 
 ## 🔒 Security (already built-in)
 - Community games **sandboxed iframe** me chalti hain — Khelog ke coins/data ko touch nahi kar sakte

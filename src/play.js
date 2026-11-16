@@ -124,8 +124,14 @@ async function load() {
     $('loading').innerHTML = '🤷<br>Game ID nahi mili';
     return;
   }
-  game = await getGame(gameId);
-  if (!game) {
+  // Meta + html chunks ek hi call se — bade game pe download progress dikhega
+  $('loading').innerHTML = '⬇️<br>Game load ho raha hai…';
+  game = await getGame(gameId, (done, total) => {
+    if (total > 1) {
+      $('loading').innerHTML = '⬇️<br>Game download… ' + done + '/' + total;
+    }
+  });
+  if (!game || !game.html) {
     $('loading').innerHTML = '🤷<br>Game nahi mila';
     $('p-title').textContent = 'Game nahi mila';
     return;
