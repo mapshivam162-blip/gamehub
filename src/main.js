@@ -401,9 +401,21 @@ function onCommunityClick(e) {
 if (cGrid) cGrid.addEventListener('click', onCommunityClick);
 
 // offline-first: pehle cache, phir fresh fetch
+// ⚡ Performance: har try/play/like pe poora grid 2 baar render hota tha —
+// ab debounce (200ms) + fresh fetch max 3 sec me ek baar — smooth
+let renderTimer = null;
+let lastFetch = 0;
+function scheduleCommunityRefresh() {
+  if (renderTimer) return;
+  renderTimer = setTimeout(() => {
+    renderTimer = null;
+    renderCommunity(cachedGames().filter((g) => g.id));
+    if (Date.now() - lastFetch > 3000) {
+      lastFetch = Date.now();
+      fetchGames().then(renderCommunity).catch(() => {});
+    }
+  }, 200);
+}
 renderCommunity(cachedGames().filter((g) => g.id));
 fetchGames().then(renderCommunity).catch(() => {});
-onGamesChange(() => {
-  renderCommunity(cachedGames().filter((g) => g.id));
-  fetchGames().then(renderCommunity).catch(() => {});
-});
+onGamesChange(() => scheduleCommunityRefresh());

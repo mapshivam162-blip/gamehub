@@ -373,14 +373,25 @@ export async function getGame(id, onProgress) {
   if (meta.html) return meta;
   if (!meta.chunks) return null;
 
-  const parts = [];
-  for (let i = 0; i < meta.chunks; i++) {
-    const cs = await fsMod.getDoc(fsMod.doc(db, 'gamehtml', id + '_' + i));
-    // text string hi hona chahiye — adhoora/corrupt chunk to fail karo
-    if (!cs.exists() || typeof cs.data().text !== 'string') return null;
-    parts.push(cs.data().text);
-    if (onProgress) onProgress(i + 1, meta.chunks);
+  // ⚡ Chunks parallel download hote hain (6 ek saath) — 30MB game bhi jaldi
+  const parts = new Array(meta.chunks);
+  let done = 0;
+  const queue = Array.from({ length: meta.chunks }, (_, i) => i);
+  async function chunkWorker() {
+    while (queue.length) {
+      const i = queue.shift();
+      const cs = await fsMod.getDoc(fsMod.doc(db, 'gamehtml', id + '_' + i));
+      // text string hi hona chahiye — adhoora/corrupt chunk to fail karo
+      if (!cs.exists() || typeof cs.data().text !== 'string') {
+        throw new Error('chunk ' + i + ' missing/corrupt');
+      }
+      parts[i] = cs.data().text;
+      done++;
+      if (onProgress) onProgress(done, meta.chunks);
+    }
   }
+  const workers = Array.from({ length: Math.min(6, meta.chunks) }, chunkWorker);
+  await Promise.all(workers);
   meta.html = parts.join('');
   return meta;
 }

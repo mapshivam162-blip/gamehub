@@ -117,34 +117,96 @@ $('p-fs').addEventListener('click', () => {
 });
 
 // ---------- Load ----------
+// ⚡ Beautiful processing bar — smooth ramp + real download progress.
+// Min 2 sec dikhta hai; bade game me real progress bar ko drive karta hai
+const MIN_LOAD_MS = 2000;
+let loadStart = Date.now();
+let realPct = 0;
+let fakePct = 0;
+let barTimer = null;
+
+function barUpdate() {
+  const fill = $('load-fill');
+  const pct = Math.min(100, Math.max(fakePct, realPct));
+  if (fill) fill.style.width = pct.toFixed(1) + '%';
+  const out = $('load-pct');
+  if (out) out.textContent = Math.round(pct) + '%';
+}
+
+function loaderStart(emoji) {
+  loadStart = Date.now();
+  realPct = 0;
+  fakePct = 0;
+  const el = $('loading');
+  el.classList.remove('done');
+  el.style.display = 'flex';
+  $('load-emoji').textContent = emoji || '🎮';
+  $('load-title').textContent = 'Game khul raha hai…';
+  barTimer = setInterval(() => {
+    // smooth ramp 85% tak (ease-out) — 2 sec ka beautiful feel
+    fakePct += (85 - fakePct) * 0.045 + 0.25;
+    if (fakePct > 85) fakePct = 85;
+    barUpdate();
+  }, 100);
+}
+
+function loaderProgress(done, total) {
+  realPct = (done / total) * 95; // chunk progress → bar (95 tak, 100 finalize pe)
+  barUpdate();
+}
+
+function loaderTitle(t, emoji) {
+  $('load-title').textContent = t;
+  if (emoji) $('load-emoji').textContent = emoji;
+}
+
+function loaderFail(t) {
+  clearInterval(barTimer); barTimer = null;
+  $('load-title').textContent = t;
+  $('load-emoji').textContent = '🤷';
+}
+
+async function loaderFinish() {
+  clearInterval(barTimer); barTimer = null;
+  realPct = 100;
+  barUpdate();
+  // 2 sec minimum — fast load pe bhi bar ka feel poora dikhe
+  const elapsed = Date.now() - loadStart;
+  if (elapsed < MIN_LOAD_MS) {
+    await new Promise((r) => setTimeout(r, MIN_LOAD_MS - elapsed));
+  }
+  $('loading').classList.add('done');
+  setTimeout(() => { $('loading').style.display = 'none'; }, 400);
+}
+
 async function load() {
   if (!gameId) {
     $('p-title').textContent = 'Game nahi mila';
     $('p-sub').textContent = 'Link adhura hai';
-    $('loading').innerHTML = '🤷<br>Game ID nahi mili';
+    loaderStart('🤷');
+    loaderFail('Game ID nahi mili');
     return;
   }
-  // Meta + html chunks ek hi call se — bade game pe download progress dikhega
-  // Naya publish hua game pehli baar kabhi-kabhi chunk race karta hai — 3 baar tak retry
-  $('loading').innerHTML = '⬇️<br>Game load ho raha hai…';
+  loaderStart('⬇️');
   game = null;
   for (let attempt = 0; attempt < 3 && !game; attempt++) {
     if (attempt) {
-      $('loading').innerHTML = '⏳<br>Dubara try kar rahe hain… (' + (attempt + 1) + ')';
+      loaderTitle('Dobara koshish kar rahe hain… (' + (attempt + 1) + ')', '⏳');
       await new Promise((r) => setTimeout(r, 1500));
     }
-    game = await getGame(gameId, (done, total) => {
-      if (total > 1) {
-        $('loading').innerHTML = '⬇️<br>Game download… ' + done + '/' + total;
-      }
-    });
+    try {
+      game = await getGame(gameId, loaderProgress);
+    } catch (e) {
+      game = null;
+    }
     if (!game || !game.html) game = null;
   }
   if (!game || !game.html) {
-    $('loading').innerHTML = '🤷<br>Game nahi mila';
+    loaderFail('Game nahi mila');
     $('p-title').textContent = 'Game nahi mila';
     return;
   }
+  loaderTitle('Game taiyaar hai!', '✅');
   $('p-title').textContent = game.emoji + ' ' + game.title;
   $('p-sub').textContent = 'by ' + (game.author || 'Publisher') + ' · ' + (game.plays || 0) + ' plays';
   $('p-likes').textContent = game.likes || 0;
@@ -168,8 +230,9 @@ async function load() {
   }
 
   // Game chalao — sandboxed iframe (hamare data se alag, safe)
+  // pehle game set karo, phir bar smooth 100% hoke fade out hoga
   $('gframe').srcdoc = shimmedHtml(game.html);
-  $('loading').style.display = 'none';
+  await loaderFinish();
   addPlay(gameId).catch(() => {});
 }
 

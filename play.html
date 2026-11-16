@@ -36,9 +36,40 @@
   #frame-wrap { flex: 1 1 auto; min-height: 0; background: #000; }
   #gframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
   #loading {
-    position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px;
+    position: absolute; inset: 0; display: flex; flex-direction: column; gap: 14px;
     align-items: center; justify-content: center; color: #8fa8cc; font-weight: 800; font-size: 13px;
+    background: radial-gradient(ellipse at 50% 40%, #17233c 0%, #0d1424 70%);
+    opacity: 1; transition: opacity .35s ease; z-index: 5;
   }
+  #loading.done { opacity: 0; pointer-events: none; }
+  .load-emoji {
+    font-size: 52px; line-height: 1;
+    animation: loadBounce 1.1s cubic-bezier(.36,.07,.19,.97) infinite alternate;
+    filter: drop-shadow(0 6px 14px rgba(80,140,255,.35));
+  }
+  @keyframes loadBounce {
+    from { transform: translateY(0) scale(1); }
+    to { transform: translateY(-14px) scale(1.08); }
+  }
+  .load-title { font-size: 13px; color: #a8c0e0; letter-spacing: .3px; }
+  .load-bar {
+    width: 62%; max-width: 260px; height: 10px; border-radius: 99px;
+    background: #1c2942; overflow: hidden; border: 1px solid #2c3d5e;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.4);
+  }
+  .load-fill {
+    height: 100%; width: 0%; border-radius: 99px;
+    background: linear-gradient(90deg, #3b82f6, #22d3ee, #a78bfa, #3b82f6);
+    background-size: 300% 100%;
+    animation: loadShimmer 1.6s linear infinite;
+    box-shadow: 0 0 12px rgba(59,130,246,.65);
+    transition: width .25s ease;
+  }
+  @keyframes loadShimmer {
+    from { background-position: 0% 0; }
+    to { background-position: 300% 0; }
+  }
+  .load-pct { font-size: 11px; color: #5f7899; font-weight: 800; }
   #trybanner {
     display: none; padding: 7px 12px; background: #2b2308; color: #ffd740;
     font-size: 11px; font-weight: 800; text-align: center; border-top: 2px solid #b8860b;
@@ -65,7 +96,12 @@
 </div>
 <div id="frame-wrap" style="position:relative;">
   <iframe id="gframe" sandbox="allow-scripts allow-pointer-lock allow-modals allow-popups allow-orientation-lock" allowfullscreen></iframe>
-  <div id="loading">🎮<br>Game load ho raha hai…</div>
+  <div id="loading">
+    <div class="load-emoji" id="load-emoji">🎮</div>
+    <div class="load-title" id="load-title">Game khul raha hai…</div>
+    <div class="load-bar"><div class="load-fill" id="load-fill"></div></div>
+    <div class="load-pct" id="load-pct">0%</div>
+  </div>
 </div>
 <div id="trybanner"></div>
 <div id="toast"></div>
