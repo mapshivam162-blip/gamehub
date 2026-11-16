@@ -125,12 +125,21 @@ async function load() {
     return;
   }
   // Meta + html chunks ek hi call se — bade game pe download progress dikhega
+  // Naya publish hua game pehli baar kabhi-kabhi chunk race karta hai — 3 baar tak retry
   $('loading').innerHTML = '⬇️<br>Game load ho raha hai…';
-  game = await getGame(gameId, (done, total) => {
-    if (total > 1) {
-      $('loading').innerHTML = '⬇️<br>Game download… ' + done + '/' + total;
+  game = null;
+  for (let attempt = 0; attempt < 3 && !game; attempt++) {
+    if (attempt) {
+      $('loading').innerHTML = '⏳<br>Dubara try kar rahe hain… (' + (attempt + 1) + ')';
+      await new Promise((r) => setTimeout(r, 1500));
     }
-  });
+    game = await getGame(gameId, (done, total) => {
+      if (total > 1) {
+        $('loading').innerHTML = '⬇️<br>Game download… ' + done + '/' + total;
+      }
+    });
+    if (!game || !game.html) game = null;
+  }
   if (!game || !game.html) {
     $('loading').innerHTML = '🤷<br>Game nahi mila';
     $('p-title').textContent = 'Game nahi mila';

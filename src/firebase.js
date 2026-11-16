@@ -356,7 +356,8 @@ export async function getGame(id, onProgress) {
   const parts = [];
   for (let i = 0; i < meta.chunks; i++) {
     const cs = await fsMod.getDoc(fsMod.doc(db, 'gamehtml', id + '_' + i));
-    if (!cs.exists()) return null; // chunk missing — game corrupt
+    // text string hi hona chahiye — adhoora/corrupt chunk to fail karo
+    if (!cs.exists() || typeof cs.data().text !== 'string') return null;
     parts.push(cs.data().text);
     if (onProgress) onProgress(i + 1, meta.chunks);
   }
