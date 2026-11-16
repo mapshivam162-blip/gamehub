@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Tetris 🧱 — Khelog</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+
+<div class="wrap">
+  <div class="cabinet">
+    <div class="badge">🧱 TETRIS</div>
+    <div class="hud">
+      <div class="hud-card">
+        <span class="hud-label">SCORE</span>
+        <span class="hud-val" id="score">0</span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">BEST</span>
+        <span class="hud-val" id="best">0</span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">LINES</span>
+        <span class="hud-val" id="lines">0</span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">LEVEL</span>
+        <span class="hud-val" id="level">1</span>
+      </div>
+    </div>
+
+    <div class="game-area">
+      <canvas id="board" width="200" height="400"></canvas>
+      <div class="side">
+        <div class="side-card">
+          <span class="side-label">NEXT</span>
+          <canvas id="next" width="80" height="80"></canvas>
+        </div>
+        <div class="side-card">
+          <span class="side-label">HOLD</span>
+          <canvas id="hold" width="80" height="80"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn" id="btn-left">◀</button>
+      <button class="ctrl-btn" id="btn-rot">↻</button>
+      <button class="ctrl-btn" id="btn-right">▶</button>
+      <button class="ctrl-btn wide" id="btn-drop">⬇ HARD DROP</button>
+      <button class="ctrl-btn wide" id="btn-soft">▼ SOFT DROP</button>
+    </div>
+
+    <div id="overlay" class="overlay">
+      <div class="overlay-card">
+        <div class="overlay-icon" id="ov-icon">🧱</div>
+        <h2 id="ov-title">Tetris</h2>
+        <p id="ov-sub">Arrow keys / buttons se khelo</p>
+        <button id="start-btn" class="start-btn">▶ Start Game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body></html>

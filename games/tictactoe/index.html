@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Tic-Tac-Toe ✖⭕ — Khelog</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+
+<div class="wrap">
+  <!-- ===== MENU SCREEN ===== -->
+  <section id="menu-screen" class="screen active">
+    <div class="cabinet">
+      <div class="badge">✖⭕ TIC-TAC-TOE</div>
+      <h1 class="title">Tic-Tac-Toe</h1>
+      <p class="subtitle">X aur O — 3 in a row banao!</p>
+
+      <div class="mode-card">
+        <h3>Mode choose karo</h3>
+        <div class="mode-buttons">
+          <button class="mode-btn active" data-mode="1p">
+            <span class="mode-icon">🤖</span>
+            <span class="mode-name">1 Player</span>
+            <span class="mode-desc">vs Computer</span>
+          </button>
+          <button class="mode-btn" data-mode="2p">
+            <span class="mode-icon">👥</span>
+            <span class="mode-name">2 Player</span>
+            <span class="mode-desc">Same device</span>
+          </button>
+          <button class="mode-btn" data-mode="online">
+            <span class="mode-icon">🌐</span>
+            <span class="mode-name">Online</span>
+            <span class="mode-desc">Room code se</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Online room card -->
+      <div id="online-card" class="mode-card" style="display:none">
+        <h3>Online Room</h3>
+        <div class="online-buttons">
+          <button id="create-room-btn" class="online-btn create">🏠 Room Banao</button>
+        </div>
+        <div class="join-row">
+          <input id="join-code" class="join-input" maxlength="5" placeholder="CODE likho" autocomplete="off"/>
+          <button id="join-room-btn" class="online-btn join">➜ Join</button>
+        </div>
+        <p id="net-status" class="net-status">Room banao ya code se join karo</p>
+      </div>
+
+      <div id="diff-card" class="mode-card">
+        <h3>Difficulty</h3>
+        <div class="diff-buttons">
+          <button class="diff-btn" data-diff="easy">Easy</button>
+          <button class="diff-btn active" data-diff="medium">Medium</button>
+          <button class="diff-btn" data-diff="hard">Hard</button>
+        </div>
+      </div>
+
+      <div id="mark-card" class="mode-card">
+        <h3>Player 1 ka mark</h3>
+        <div class="mark-buttons">
+          <button class="mark-btn active" data-mark="X">✖ X</button>
+          <button class="mark-btn" data-mark="O">⭕ O</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="start-btn">▶ Start Game</button>
+    </div>
+  </section>
+
+  <!-- ===== GAME SCREEN ===== -->
+  <section id="game-screen" class="screen">
+    <div class="cabinet game-cabinet">
+      <div class="game-header">
+        <div class="logo-small">✖⭕</div>
+        <div class="turn-pill">
+          <span id="turn-icon" class="turn-mark x-mark">✖</span>
+          <span id="turn-text">X ki turn</span>
+        </div>
+        <button id="restart-btn" class="icon-btn" aria-label="Restart"><i class="bi bi-arrow-counterclockwise"></i></button>
+      </div>
+
+      <div class="board" id="board">
+        <button class="cell" data-i="0"></button>
+        <button class="cell" data-i="1"></button>
+        <button class="cell" data-i="2"></button>
+        <button class="cell" data-i="3"></button>
+        <button class="cell" data-i="4"></button>
+        <button class="cell" data-i="5"></button>
+        <button class="cell" data-i="6"></button>
+        <button class="cell" data-i="7"></button>
+        <button class="cell" data-i="8"></button>
+      </div>
+
+      <div class="score-row">
+        <div class="score-card x-card">
+          <span class="score-label" id="p1-label">X (P1)</span>
+          <span class="score-num" id="score-x">0</span>
+        </div>
+        <div class="score-card tie-card">
+          <span class="score-label">TIES</span>
+          <span class="score-num" id="score-tie">0</span>
+        </div>
+        <div class="score-card o-card">
+          <span class="score-label" id="p2-label">O (P2)</span>
+          <span class="score-num" id="score-o">0</span>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="menu-btn">← Menu</button>
+    </div>
+  </section>
+</div>
+
+<!-- Chat (online mode) -->
+<button id="chat-fab" class="chat-fab" aria-label="Chat">💬<span id="chat-badge" class="chat-badge hidden">0</span></button>
+<div id="chat-panel" class="chat-panel">
+  <div class="chat-head">
+    <span>💬 Dost se Chat</span>
+    <button id="chat-close" class="chat-x">✕</button>
+  </div>
+  <div id="chat-msgs" class="chat-msgs"></div>
+  <div class="chat-input-row">
+    <input id="chat-input" class="chat-input" maxlength="120" placeholder="Message likho..." autocomplete="off"/>
+    <button id="chat-send" class="chat-send">➤</button>
+  </div>
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="result-modal">
+  <div class="modal-card">
+    <div id="modal-icon" class="modal-icon"></div>
+    <h2 id="modal-title">X WINS!</h2>
+    <p id="modal-sub" class="modal-sub"></p>
+    <div class="modal-buttons">
+      <button class="btn btn-silver" id="quit-btn">Quit</button>
+      <button class="btn btn-yellow" id="next-round-btn">Next Round</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body></html>

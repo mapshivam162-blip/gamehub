@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0e1633"/>
+<link rel="icon" type="image/svg+xml" href="../../icon.svg"/>
+<title>Cricket 🏏 — Khelog</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,700;6..12,800;6..12,900&amp;family=Fredoka:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<a id="back-btn" href="../../" aria-label="Home pe wapas jao">←</a>
+
+<div class="wrap">
+  <section class="screen active">
+    <div class="cabinet">
+      <div class="badge">🏏 CRICKET</div>
+      <h1 class="title">Cricket</h1>
+
+      <div id="setup" class="card">
+        <h3>Cricket Black style — swipe maarke run banao!</h3>
+        <ul class="howto">
+          <li>Ball aate hi canvas pe SWIPE karo 👆</li>
+          <li>Upar swipe = bada shot, Left = leg side, Right = off side</li>
+          <li>Perfect timing + straight swipe = SIX! 💥</li>
+          <li>Galat timing = BOWLED! 😵</li>
+        </ul>
+        <button id="start-btn" class="big-btn">🏏 Khel Shuru</button>
+      </div>
+
+      <div id="game" style="display:none">
+        <div class="top-bar">
+          <span id="ball-count">Ball 1/10</span>
+          <span id="score">0 runs</span>
+        </div>
+        <canvas id="gameCanvas" width="420" height="560"></canvas>
+        <div id="commentary" class="hint">Bowler daal raha hai... TAP KARO jab ball aaye!</div>
+      </div>
+
+      <div id="result-modal" class="modal">
+        <div class="modal-box">
+          <div id="result-emoji" class="modal-emoji">🏏</div>
+          <h2 id="result-title" class="modal-title">Innings Over!</h2>
+          <p id="result-sub" class="modal-sub"></p>
+          <button id="again-btn" class="big-btn">🔄 Phir Se Khelo</button>
+          <button id="menu-btn" class="small-btn">← Menu</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

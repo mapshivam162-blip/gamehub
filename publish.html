@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#ECE9FC"/>
+<meta name="description" content="Khelog Publisher Studio — apna HTML game publish karo"/>
+<link rel="icon" type="image/svg+xml" href="icon.svg"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<title>Publisher Studio 🚀 — Khelog</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          boxShadow: {
+            'clay-card': '0 12px 28px -6px rgba(110, 117, 160, 0.16), 0 4px 12px -2px rgba(110, 117, 160, 0.08)',
+            'clay-btn': '0 8px 18px -4px rgba(37, 117, 252, 0.45)',
+            'pill-soft': '0 4px 14px 0 rgba(140, 148, 195, 0.18)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background: radial-gradient(circle at 50% 0%, #ECE9FC 0%, #DDD8F3 50%, #D4CEF0 100%);
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .tactile-press:active { transform: scale(0.96); transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1); }
+    .fade-up { animation: fadeUp 0.45s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; } }
+    #toast {
+      position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(20px);
+      background: #1e2333; color: #fff; font-size: 0.8rem; font-weight: 700;
+      padding: 10px 18px; border-radius: 999px; opacity: 0; pointer-events: none;
+      transition: all 0.25s ease; z-index: 60; white-space: nowrap; max-width: 92vw;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    textarea { resize: vertical; }
+  </style>
+  <script type="module" crossorigin src="./assets/publish--LazmLds.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/firebase-CiHGjH6c.js">
+  <link rel="stylesheet" crossorigin href="./assets/firebase-Bk4Cil8H.css">
+</head>
+<body class="font-sans text-slate-800 antialiased flex justify-center">
+<div class="w-full max-w-[420px] min-h-screen relative flex flex-col" id="app">
+<main class="flex-1 pb-28" style="padding-top: max(0.25rem, env(safe-area-inset-top));">
+
+<!-- Top bar -->
+<section class="px-4 pt-4 pb-2 flex items-center justify-between">
+  <a href="./" class="w-10 h-10 rounded-full bg-white/90 shadow-pill-soft border border-white flex items-center justify-center tactile-press">
+    <i class="fa-solid fa-arrow-left text-slate-600"></i>
+  </a>
+  <div class="text-center flex-1">
+    <h1 class="text-base font-black text-slate-900 tracking-tight">Publisher Studio 🚀</h1>
+    <p class="text-[10px] font-bold text-slate-400" id="mode-note">Apna game sabko dikhao</p>
+  </div>
+  <div class="w-10"></div>
+</section>
+
+<!-- AUTH CARD -->
+<section class="mt-2 px-4" id="auth-section">
+  <div class="bg-white rounded-[26px] p-5 shadow-clay-card border border-white/80 fade-up">
+    <div id="auth-form">
+      <h2 class="text-lg font-black text-slate-900">Publisher login</h2>
+      <p class="text-[11px] font-bold text-slate-400 mt-0.5 mb-3">Email + password se account banao, games publish karo</p>
+      <input id="a-name" type="text" placeholder="Publisher ka naam" class="w-full px-4 py-3 mb-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-sm font-bold outline-none focus:border-blue-400"/>
+      <input id="a-email" type="email" placeholder="Email" class="w-full px-4 py-3 mb-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-sm font-bold outline-none focus:border-blue-400"/>
+      <input id="a-pass" type="password" placeholder="Password (6+ letters)" class="w-full px-4 py-3 mb-3 rounded-2xl bg-slate-50 border-2 border-slate-200 text-sm font-bold outline-none focus:border-blue-400"/>
+      <button id="a-signup" class="w-full py-3 rounded-full bg-blue-600 text-white font-black text-sm shadow-clay-btn tactile-press">Account banao 🚀</button>
+      <button id="a-login" class="w-full py-3 mt-2 rounded-full bg-slate-100 text-slate-700 font-black text-sm tactile-press">Login karo</button>
+      <p class="text-[10px] font-bold text-slate-400 mt-3 text-center">⚠️ Password bhool jao to recover nahi hoga (abhi)</p>
+    </div>
+    <div id="auth-session" class="hidden">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-[20px] bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg shadow-md">🚀</div>
+        <div class="flex-1 min-w-0">
+          <p id="s-name" class="text-sm font-black text-slate-900 truncate">Publisher</p>
+          <p id="s-email" class="text-[11px] font-bold text-slate-400 truncate">email</p>
+        </div>
+        <button id="s-logout" class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 font-black text-[11px] tactile-press">Logout</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PUBLISH FORM -->
+<section class="mt-4 px-4 hidden" id="form-section">
+  <div class="bg-white rounded-[26px] p-5 shadow-clay-card border border-white/80 fade-up">
+    <h2 class="text-lg font-black text-slate-900">Game publish karo</h2>
+    <p class="text-[11px] font-bold text-slate-400 mt-0.5 mb-3">Ek complete <b>index.html</b> (HTML + CSS + JS sab ek file me)</p>
+
+    <div class="flex gap-2.5 mb-2.5">
+      <input id="g-emoji" type="text" maxlength="4" value="🎮" class="w-14 text-center text-xl px-0 py-3 rounded-2xl bg-slate-50 border-2 border-slate-200 font-bold outline-none focus:border-blue-400"/>
+      <input id="g-title" type="text" maxlength="40" placeholder="Game ka naam" class="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border-2 border-slate-200 text-sm font-bold outline-none focus:border-blue-400"/>
+    </div>
+    <div class="flex gap-1.5 mb-2.5 overflow-x-auto no-scrollbar" id="emoji-quick">
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">🎮</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">🕹️</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">👾</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">🏎️</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">🍄</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">🐍</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">⚽</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">🧩</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">🐉</button>
+      <button class="eq px-2.5 py-1.5 rounded-full bg-slate-100 text-base tactile-press">🪐</button>
+    </div>
+    <input id="g-desc" type="text" maxlength="120" placeholder="Choti si description (kaise khelte hain?)" class="w-full px-4 py-3 mb-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-sm font-bold outline-none focus:border-blue-400"/>
+
+    <!-- Logo picker -->
+    <div class="flex items-center gap-3 mb-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl p-3">
+      <div id="g-logo-preview-wrap" class="hidden">
+        <img id="g-logo-preview" class="w-12 h-12 rounded-[14px] object-cover shadow-md" alt="logo"/>
+      </div>
+      <div class="flex-1 min-w-0">
+        <label class="px-3.5 py-2 rounded-full bg-white border border-slate-200 text-slate-700 font-black text-xs tactile-press cursor-pointer inline-block" id="g-logo-label">
+          🖼️ Logo chuno (PNG/JPG)
+          <input id="g-logo-file" type="file" accept="image/*" class="hidden"/>
+        </label>
+        <p class="text-[9px] font-bold text-slate-400 mt-1">Card pe yahi logo dikhega · 200KB tak (auto-shrink hota hai)</p>
+      </div>
+      <button id="g-logo-remove" class="px-2.5 py-1.5 rounded-full bg-rose-50 text-rose-500 font-black text-[10px] tactile-press">✕</button>
+    </div>
+
+    <div class="flex items-center gap-2 mb-2">
+      <label class="px-4 py-2.5 rounded-full bg-slate-100 text-slate-700 font-black text-xs tactile-press cursor-pointer">
+        📁 .html file chuno
+        <input id="g-file" type="file" accept=".html,.htm,text/html" class="hidden"/>
+      </label>
+      <span id="g-size" class="text-[10px] font-bold text-slate-400">max 30MB</span>
+    </div>
+    <textarea id="g-html" rows="6" placeholder="…ya yahan pura HTML paste karo" class="w-full px-4 py-3 mb-1 rounded-2xl bg-slate-50 border-2 border-slate-200 text-[11px] font-mono outline-none focus:border-blue-400"></textarea>
+    <p id="g-count" class="text-[10px] font-bold text-slate-400 text-right mb-3">0 KB</p>
+
+    <button id="g-preview" class="w-full py-3 rounded-full bg-slate-100 text-slate-700 font-black text-sm tactile-press mb-2.5">▶️ Preview chalao</button>
+    <button id="g-publish" class="w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black text-sm shadow-clay-btn tactile-press">🚀 Publish karo</button>
+    <p class="text-[10px] font-bold text-slate-400 mt-3 leading-relaxed">📋 Publish ke baad game <b>"Coming Soon"</b> dikhega — log TRY kar sakte hain. <b>20 log try</b> kar lenge to <b>auto-publish</b> ho jayega! ✅</p>
+  </div>
+</section>
+
+<!-- MY GAMES -->
+<section class="mt-4 px-4 hidden" id="mygames-section">
+  <div class="flex items-center justify-between px-1 mb-2.5">
+    <h2 class="text-lg font-black text-slate-900 tracking-tight">Mere games</h2>
+    <span id="mygames-count" class="text-[11px] font-bold text-slate-400"></span>
+  </div>
+  <div id="mygames-list" class="space-y-3"></div>
+</section>
+
+<!-- ADMIN -->
+<section class="mt-4 px-4 hidden" id="admin-section">
+  <div class="bg-rose-50 rounded-[26px] p-5 shadow-clay-card border border-rose-100 fade-up">
+    <h2 class="text-lg font-black text-rose-900">👑 Admin panel</h2>
+    <p class="text-[11px] font-bold text-rose-400 mt-0.5 mb-3">Sabhi games — delete kar sakte ho</p>
+    <div id="admin-list" class="space-y-3"></div>
+  </div>
+</section>
+
+</main>
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- PREVIEW MODAL -->
+<div id="preview-modal" class="hidden fixed inset-0 z-[70] bg-slate-900/90 backdrop-blur-sm flex flex-col">
+  <div class="flex items-center justify-between px-4 py-3">
+    <span class="text-white font-black text-sm" id="preview-title">Preview</span>
+    <button id="preview-close" class="w-10 h-10 rounded-full bg-white/10 text-white font-black tactile-press">✕</button>
+  </div>
+  <iframe id="preview-frame" class="flex-1 w-full bg-white" sandbox="allow-scripts allow-pointer-lock allow-modals allow-popups allow-orientation-lock"></iframe>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,147 @@
+.chess-board {
+    width: var(--board-size);
+    height: var(--board-size);
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    border: 4px solid #0084ff;
+    border-radius: 8px;
+    box-shadow: 0 8px 0 #0054ab, 0 12px 24px rgba(0,0,0,0.4);
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    min-height: 0;
+    min-width: 0;
+}
+
+.square:hover { filter: brightness(1.06); }
+
+.square.light { background-color: var(--light-square); }
+.square.dark { background-color: var(--dark-square); }
+
+.square.selected {
+    background-color: var(--selected-square);
+    box-shadow: inset 0 0 0 3px rgba(74, 222, 128, 0.8);
+}
+
+/* Green dots: legal empty destinations (~28% diameter, clean & centered).
+   Dark squares #4ADE80, light squares #22C55E at 0.85 opacity.
+   .chess-board prefix + display:block — kyunki coords rule (.square::after)
+   display:none laga deta tha aur dots kabhi dikhte hi nahi the! */
+.chess-board .square.possible-move::after {
+    content: '';
+    position: absolute;
+    width: 28%;
+    height: 28%;
+    background-color: #4ADE80;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+    display: block;
+}
+.chess-board .square.possible-move.light::after {
+    background-color: rgba(34, 197, 94, 0.85);
+}
+
+/* Capture ring: enemy piece wale target pe glowing green ring.
+   JS 'possible-capture' class lagata hai (purane WebView me :has() nahi chalta) */
+.chess-board .square.possible-move:has(.piece)::after,
+.chess-board .square.possible-capture::after {
+    width: 82%;
+    height: 82%;
+    background-color: transparent;
+    border: 4px solid rgba(74, 222, 128, 0.85);
+    border-radius: 50%;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.55), 0 0 4px rgba(74, 222, 128, 0.7);
+}
+
+.square.in-check {
+    background-color: var(--check-square);
+    animation: check-pulse 1.5s ease infinite alternate;
+}
+
+@keyframes check-pulse {
+    from { box-shadow: inset 0 0 8px rgba(255, 0, 0, 0.3); }
+    to { box-shadow: inset 0 0 16px rgba(255, 0, 0, 0.6); }
+}
+
+.square.last-move-from,
+.square.last-move-to {
+    background-color: rgba(250, 204, 21, 0.45);
+}
+
+/* Coordinates */
+.square::before, .square::after {
+    position: absolute;
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 0.65rem;
+    font-weight: 700;
+    z-index: 2;
+    pointer-events: none;
+    display: var(--show-coords, none);
+}
+.square.dark::before, .square.dark::after { color: rgba(255, 255, 255, 0.6); }
+.square::before { bottom: 2px; left: 3px; }
+.square::after { top: 2px; right: 3px; }
+.square[data-col="0"]::before { content: 'a'; }
+.square[data-col="1"]::before { content: 'b'; }
+.square[data-col="2"]::before { content: 'c'; }
+.square[data-col="3"]::before { content: 'd'; }
+.square[data-col="4"]::before { content: 'e'; }
+.square[data-col="5"]::before { content: 'f'; }
+.square[data-col="6"]::before { content: 'g'; }
+.square[data-col="7"]::before { content: 'h'; }
+.square[data-row="7"]::after { content: '1'; }
+.square[data-row="6"]::after { content: '2'; }
+.square[data-row="5"]::after { content: '3'; }
+.square[data-row="4"]::after { content: '4'; }
+.square[data-row="3"]::after { content: '5'; }
+.square[data-row="2"]::after { content: '6'; }
+.square[data-row="1"]::after { content: '7'; }
+.square[data-row="0"]::after { content: '8'; }
+.square[data-row="7"][data-col="0"]::before { display: none !important; }
+.square[data-row="0"][data-col="7"]::after { display: none !important; }
+
+.piece {
+    width: 88%;
+    height: 88%;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    position: relative;
+    transition: transform 0.12s ease;
+    will-change: transform;
+    pointer-events: auto;
+}
+
+.piece.dragging {
+    cursor: grabbing;
+    opacity: 0.85;
+    z-index: 100;
+    pointer-events: none;
+    position: fixed;
+    transition: none !important;
+}
+
+.piece:hover { transform: scale(1.08); }
+.piece:active { cursor: grabbing; transform: scale(1.12); }
+
+.piece.moved { animation: move-piece 0.25s ease; }
+
+@keyframes move-piece {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.piece::before, .piece::after { content: none !important; display: none !important; }
